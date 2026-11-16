@@ -16,3 +16,5 @@ Thumbs.db
 # Persona 5 Royal game assets and old prototypes must never be committed
 packages/p5r-ds/assets/
 packages/p5r-ds/reference/
+
+*.tsbuildinfo

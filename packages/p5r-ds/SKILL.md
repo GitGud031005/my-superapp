@@ -27,7 +27,7 @@ This folder is a self-contained design system: CSS tokens, 15 React components a
 2. **Plan the page as a table**: section, component(s), one-line purpose. Use the recipes below. Show it to the user before building when they are available.
 3. **Build.**
    - **No build step:** copy `starter.html` to the page's location. Every line marked `P5R-PATH` holds a path relative to this folder; prefix each one with the path from the page to this folder (for a page next to `p5r-ds/`: `p5r-ds/styles.css`, `p5r-ds/_ds_bundle.jsx`, `p5r-ds/assets`). Replace the demo content inside `App`. Put page-only CSS between `PAGE LAYOUT` and `PAGE LAYOUT END`.
-   - **Vite / React app:** `import` `styles.css` once in the entry file, wrap the module root in `<div className="p5r-scope">`, then `import { Button, Panel } from` this folder's `index.js`. Images must be served: the project keeps a copy of `assets/` in `public/p5r-assets/`, and `TarotCard` / `CallingCard` get `assetBase="/p5r-assets"`.
+   - **Vite / React app:** `import` `styles.css` once in the entry file, wrap the module root in `<div className="p5r-scope">`, then `import { Button, Panel } from` this folder's `index.js`. Images must be served: in `my-superapp` the dev server serves `assets/` at `/p5r-assets` (never copy them into `public/`), and `TarotCard` / `CallingCard` get `assetBase="/p5r-assets"`.
 4. **Check.** Serve the page over http and run `node <this folder>/scripts/check-page.mjs <url>`. Fix every ERROR, then look at the screenshots it saves, at 375 and 320 too. When text overflows, shorten or reflow it; never shrink type below its token.
 5. **Deliver** the page and say what you checked and what you could not.
 

@@ -1,0 +1,21 @@
+.phantom-ledger {
+  background: var(--surface-canvas);
+  color: var(--text-on-dark);
+  font: var(--weight-body) var(--text-body-md) / var(--leading-normal) var(--font-body);
+}
+
+.phantom-ledger__page {
+  display: grid;
+  gap: var(--space-7);
+  max-inline-size: 720px;
+  padding: var(--space-7) var(--space-6);
+}
+
+.phantom-ledger__stack {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.phantom-ledger__stack p {
+  margin: 0;
+}

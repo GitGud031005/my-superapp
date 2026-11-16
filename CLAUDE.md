@@ -4,23 +4,30 @@ Personal superapp: a neutral shell that hosts feature modules. The first module 
 
 ## Layout
 
-Only `packages/p5r-ds/` exists today. The rest is planned.
-
-- `apps/web` (planned): Vite + React + TS shell, neutral styling
-- `modules/phantom-ledger/web` (planned): the module UI
-- `packages/p5r-ds`: Persona 5 Royal design system
-- `backend/` (planned): Spring Boot modular monolith, Java 21, Maven, Postgres
-- `infra/` (planned): Docker Compose, kustomize for minikube
+- `apps/web` (`@superapp/web`): Vite + React + TS shell, neutral styling. Routes: `/` lists modules, `/ledger/*` lazy-loads `@superapp/phantom-ledger-web`
+- `modules/phantom-ledger/web` (`@superapp/phantom-ledger-web`): the module UI, the only consumer of the design system. Exports its source (`src/index.tsx`); the shell bundles it
+- `packages/p5r-ds` (`@superapp/p5r-ds`): Persona 5 Royal design system
+- `backend/`: Spring Boot modular monolith, Java 21, Maven, Spring Modulith, Flyway, Postgres. Base package `com.superapp`; each module is a subpackage (`ledger`, `shared`) with a `package-info.java`
+- `infra/compose.yaml`: local Postgres, read by Spring's docker-compose support. Kustomize for minikube is planned
 - `.github/workflows/` (planned): CI
 
-Workspace tooling is pnpm (Phase 2).
+Workspace tooling is pnpm; shared dev tooling (TypeScript, ESLint, Vitest) lives in the root `package.json`.
+
+## Commands
+
+From the repo root:
+
+- `pnpm install`, `pnpm dev` (shell on :5173, `/api` proxied to :8080)
+- `pnpm -r lint | typecheck | test | build`
+- Backend: `cd backend`, then `./mvnw spring-boot:run` or `./mvnw verify`. Both need Docker
 
 ## Persona 5 Royal rule
 
 - Only `modules/phantom-ledger` may import `packages/p5r-ds`. The shell and every other module use their own neutral styling and must never get the P5R look.
 - Tokens live on `.p5r-scope`, not `:root`. Render the module inside an element with that class (`<div className="p5r-scope">` around the module root). Never move tokens back to `:root`: Vite injects CSS globally and never removes it.
 - Read `packages/p5r-ds/SKILL.md` before building or changing that module's UI.
-- Game assets (`packages/p5r-ds/assets/`) and `packages/p5r-ds/reference/` are gitignored. Never commit, publish or deploy them. The module UI needs fallbacks for when `TarotCard`, `CallingCard` or logo images are missing.
+- ESLint (`eslint.config.js`) bans `@superapp/p5r-ds` imports everywhere except `modules/phantom-ledger/**`. Do not loosen it.
+- Game assets (`packages/p5r-ds/assets/`) and `packages/p5r-ds/reference/` are gitignored. Never commit, publish or deploy them. In dev, `apps/web/vite.config.ts` serves them at `/p5r-assets/*` (`apply: 'serve'` plugin); never copy them into a `public/` folder, or production builds would ship them. The module UI needs fallbacks for when `TarotCard`, `CallingCard` or logo images are missing.
 
 ## Design system commands
 

@@ -1,0 +1,24 @@
+{
+  "name": "@superapp/phantom-ledger-web",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@superapp/p5r-ds": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "devDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  }
+}

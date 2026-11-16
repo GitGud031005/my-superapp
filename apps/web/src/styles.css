@@ -1,0 +1,94 @@
+:root {
+  --shell-bg: #fafafa;
+  --shell-surface: #fff;
+  --shell-text: #1f2328;
+  --shell-muted: #636c76;
+  --shell-border: #d8dee4;
+  --shell-accent: #2563eb;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--shell-bg);
+  color: var(--shell-text);
+  font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100vh;
+}
+
+main {
+  display: grid;
+  grid-template-rows: 1fr;
+  flex: 1;
+}
+
+a {
+  color: var(--shell-accent);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--shell-accent);
+  outline-offset: 2px;
+}
+
+.shell-header {
+  padding: 12px 24px;
+  background: var(--shell-surface);
+  border-block-end: 1px solid var(--shell-border);
+}
+
+.shell-brand {
+  color: var(--shell-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.shell-page {
+  inline-size: 100%;
+  max-inline-size: 720px;
+  margin-inline: auto;
+  padding: 32px 24px;
+}
+
+.shell-page h1 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.shell-modules {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shell-modules li {
+  padding: 16px;
+  background: var(--shell-surface);
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+}
+
+.shell-modules a {
+  font-weight: 600;
+}
+
+.shell-modules p {
+  margin: 4px 0 0;
+  color: var(--shell-muted);
+}
+
+.shell-status {
+  padding: 32px 24px;
+  color: var(--shell-muted);
+}
