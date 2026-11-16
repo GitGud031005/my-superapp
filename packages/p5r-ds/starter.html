@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en" class="p5r-scope"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page title</title>
+<!-- P5R-PATH: every path marked P5R-PATH is relative to the design system folder. Prefix them when the page lives elsewhere -->
+<link rel="icon" href="assets/brand/phantom-thieves-logo.png"><!-- P5R-PATH -->
+<link rel="stylesheet" href="styles.css"><!-- P5R-PATH -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="_ds_bundle.jsx"></script><!-- P5R-PATH -->
+<style>
+/* PAGE LAYOUT: page-level rules only, built from tokens. Component looks live in components.css */
+body{ margin:0; background:var(--surface-canvas); color:var(--text-on-dark); font:var(--weight-body) var(--text-body-md)/var(--leading-normal) var(--font-body); }
+.skip{ position:absolute; inset-inline-start:var(--space-4); inset-block-start:-100px; z-index:3; padding:var(--space-2) var(--space-4); background:var(--accent-highlight); color:var(--text-on-yellow); font-weight:var(--weight-body-strong); }
+.skip:focus{ inset-block-start:var(--space-4); }
+.site-header{ position:relative; overflow:hidden; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--space-6); padding:var(--space-7) var(--space-6); background:var(--bullseye); }
+.site-header::before{ content:''; position:absolute; inset:0; background:var(--halftone); opacity:.25; pointer-events:none; }
+.site-header > *{ position:relative; }
+.site-nav{ position:sticky; inset-block-start:0; z-index:2; display:flex; flex-wrap:wrap; gap:var(--space-3); padding:var(--space-4) var(--space-6); background:var(--surface-panel-dark); border-block-end:var(--outline-w) solid var(--accent-primary); }
+.site-nav a{ display:inline-flex; align-items:center; min-height:40px; padding:0 var(--space-5); background:var(--surface-panel-light); color:var(--text-on-light); text-decoration:none; font:400 var(--text-body-md)/1 var(--font-display); letter-spacing:.08em; text-transform:uppercase; transform:skewX(var(--skew-menu)); }
+.site-nav a > span{ display:inline-block; transform:skewX(calc(var(--skew-menu) * -1)); }
+.site-nav a[aria-current="page"]{ background:var(--accent-select); }
+.site-nav a:focus-visible{ outline:3px solid var(--focus-ring); outline-offset:4px; }
+@media (hover:hover){ .site-nav a:hover{ background:var(--accent-select); } }
+main{ display:grid; gap:var(--space-9); max-width:1100px; padding:var(--space-8) var(--space-6); }
+section{ display:grid; gap:var(--space-7); scroll-margin-top:96px; }
+.grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap:var(--space-7); align-items:start; }
+.row{ display:flex; flex-wrap:wrap; gap:var(--space-5); align-items:center; }
+.stack{ display:grid; gap:var(--space-4); }
+footer{ padding:var(--space-6); border-block-start:1px solid var(--border-subtle-on-dark); color:var(--text-muted-on-dark); font-size:var(--text-body-sm); }
+/* PAGE LAYOUT END */
+</style></head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { RansomTitle, DateSticker, Banner, Panel, Button, Tag, StatBar, TarotCard, Dialog } = window.PersonaFiveRoyalDS;
+const ASSETS = 'assets'; // P5R-PATH: the design system's assets/ folder, as seen from this page
+
+function App() {
+  const [flipped, setFlipped] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <a className="skip" href="#main">Skip to content</a>
+      <header className="site-header">
+        <RansomTitle as="h1" text="Page title" size={56} skin="logo" />
+        <DateSticker month={4} day={9} weekday="Sat" period="After school" />
+      </header>
+      <nav className="site-nav" aria-label="Main">
+        <a href="#targets" aria-current="page"><span>Targets</span></a>
+        <a href="#arcana"><span>Arcana</span></a>
+      </nav>
+      <main id="main">
+        <section id="targets">
+          <Banner as="h2" tone="red">Targets</Banner>
+          <div className="grid">
+            <Panel title="Mission" tilt="-1deg">
+              <div className="stack">
+                <div className="row"><Tag tone="red">Wanted</Tag><Tag tone="yellow">New</Tag></div>
+                <p style={{ margin: 0 }}>Replace this with real content. One idea per panel.</p>
+                <StatBar label="Progress" value={3} max={5} kind="progress" />
+              </div>
+            </Panel>
+            <Panel tone="light">
+              <div className="stack">
+                <p style={{ margin: 0 }}>Light panels carry longer, readable text.</p>
+                <div className="row">
+                  <Button variant="primary" onClick={() => setOpen(true)}>Send the card</Button>
+                  <Button variant="dark">Cancel</Button>
+                </div>
+              </div>
+            </Panel>
+          </div>
+        </section>
+        <section id="arcana">
+          <Banner as="h2" tone="white">Arcana</Banner>
+          <div className="row">
+            <TarotCard index={1} name="The Fool" height={280} tilt="-3deg" back={flipped} onFlip={() => setFlipped((f) => !f)} assetBase={ASSETS} />
+          </div>
+        </section>
+      </main>
+      <footer>Fan-made for personal use. Persona 5 Royal belongs to Atlus and Sega.</footer>
+      <Dialog open={open} title="Send the card?" onClose={() => setOpen(false)}
+        actions={<><Button onClick={() => setOpen(false)}>Cancel</Button><Button variant="primary" onClick={() => setOpen(false)}>Send the card</Button></>}>
+        The target will know you are coming.
+      </Dialog>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body></html>

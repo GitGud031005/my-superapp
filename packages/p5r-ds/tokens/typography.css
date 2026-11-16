@@ -1,0 +1,35 @@
+.p5r-scope{
+/* The in-game UI font is unconfirmed (see research/phase1-notes.md). These are free look-alikes, to be confirmed. */
+--font-display:'Anton','Archivo Black',Impact,sans-serif; /* condensed heavy: titles, menu labels, numerals */
+--font-body:'Archivo',system-ui,sans-serif; /* readable text. The game's own tight tracking reads poorly, so body stays plain */
+--font-ransom-1:'Anton',sans-serif; /* ransom-note tile faces, same set the calling card uses */
+--font-ransom-2:'Abril Fatface',serif;
+--font-ransom-3:'Archivo Black',sans-serif;
+--font-ransom-4:'Libre Baskerville',serif;
+--font-ransom-5:'Special Elite',monospace;
+--font-ransom-6:'Playfair Display',serif;
+--font-ransom-7:'Rubik Mono One',sans-serif;
+
+--weight-body:400;
+--weight-body-strong:600;
+--weight-body-heavy:800;
+
+--text-display-xl:96px; /* page title, ransom headline */
+--text-display-lg:64px;
+--text-display-md:44px;
+--text-heading-lg:32px;
+--text-heading-md:24px;
+--text-control:18px; /* buttons, tabs, stat labels */
+--text-menu:28px; /* menu list item. Selected item scales by --menu-select-scale */
+--text-body-lg:18px;
+--text-body-md:16px;
+--text-body-sm:14px;
+--text-label:12px;
+
+--leading-tight:1;
+--leading-snug:1.2;
+--leading-normal:1.55; /* body only */
+--tracking-display:.01em; /* no tight tracking: readability complaint */
+--tracking-label:.1em;
+--menu-select-scale:1.18;
+}

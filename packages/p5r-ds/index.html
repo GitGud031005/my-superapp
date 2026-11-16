@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" class="p5r-scope"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persona 5 Royal design system</title>
+<link rel="icon" href="assets/brand/phantom-thieves-logo.png">
+<link rel="stylesheet" href="styles.css">
+<style>
+body{ margin:0; background:var(--surface-canvas); color:var(--text-on-dark); font:var(--weight-body) var(--text-body-md)/var(--leading-normal) var(--font-body); }
+.skip{ position:absolute; inset-inline-start:var(--space-4); inset-block-start:-100px; padding:var(--space-2) var(--space-4); background:var(--accent-highlight); color:var(--text-on-yellow); font-weight:var(--weight-body-strong); }
+.skip:focus{ inset-block-start:var(--space-4); }
+header{ position:relative; overflow:hidden; padding:var(--space-8) var(--space-6) var(--space-7); background:var(--bullseye); container-type:inline-size; }
+header::before{ content:''; position:absolute; inset:0; background:var(--halftone); opacity:.25; pointer-events:none; }
+.title{ position:relative; display:inline-block; margin:0; padding:var(--space-3) var(--space-6); background:var(--surface-panel-dark); transform:rotate(var(--tilt-sm)); box-shadow:var(--shadow-hard-md); }
+.title b{ display:block; font:400 clamp(40px, 9cqw, var(--text-display-xl))/1 var(--font-display); text-transform:uppercase; letter-spacing:var(--tracking-display); }
+.title span{ display:inline-block; margin-top:var(--space-2); padding:var(--space-1) var(--space-4); background:var(--accent-highlight); color:var(--text-on-yellow); font:400 var(--text-heading-md)/1 var(--font-display); letter-spacing:.14em; text-transform:uppercase; }
+.lede{ position:relative; max-width:60ch; margin:var(--space-6) 0 0; padding:var(--space-3) var(--space-4); background:var(--surface-panel-dark); color:var(--text-on-dark); text-wrap:pretty; }
+nav{ position:sticky; inset-block-start:0; z-index:2; display:flex; flex-wrap:wrap; gap:var(--space-3); padding:var(--space-4) var(--space-6); background:var(--surface-panel-dark); border-block-end:var(--outline-w) solid var(--accent-primary); }
+nav a{ display:inline-flex; align-items:center; min-height:40px; padding:0 var(--space-5); background:var(--surface-panel-light); color:var(--text-on-light); text-decoration:none; font:400 var(--text-body-md)/1 var(--font-display); letter-spacing:.08em; text-transform:uppercase; transform:skewX(var(--skew-menu)); }
+nav a > span{ display:inline-block; transform:skewX(calc(var(--skew-menu) * -1)); }
+nav a:focus-visible{ outline:3px solid var(--focus-ring); outline-offset:4px; }
+@media (hover:hover){ nav a:hover{ background:var(--accent-select); } }
+main{ padding:var(--space-6); display:grid; gap:var(--space-9); max-width:1100px; }
+section{ display:grid; gap:var(--space-6); scroll-margin-top:96px; }
+h2{ margin:0; justify-self:start; padding:var(--space-2) var(--space-6); background:var(--accent-primary); color:var(--text-on-red); font:400 var(--text-heading-lg)/1 var(--font-display); text-transform:uppercase; letter-spacing:var(--tracking-display); clip-path:var(--clip-banner); }
+.card{ display:grid; gap:var(--space-3); }
+.card h3{ margin:0; font:400 var(--text-heading-md)/1.1 var(--font-display); text-transform:uppercase; letter-spacing:var(--tracking-display); }
+.card p{ margin:0; max-width:70ch; color:var(--text-muted-on-dark); text-wrap:pretty; }
+.card a{ color:var(--accent-select); font-size:var(--text-body-sm); justify-self:start; }
+.frame{ border:var(--outline-w) solid var(--stroke-on-dark); box-shadow:var(--shadow-hard-red); background:var(--surface-canvas); }
+.frame iframe{ display:block; width:100%; border:0; }
+</style></head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+  <h1 class="title"><b>Persona 5 Royal</b><span>Design system</span></h1>
+  <p class="lede">Tokens, guidelines and React components in the style of the Phantom Thieves. Personal, local use only: game art belongs to Atlus and Sega.</p>
+</header>
+<nav aria-label="Sections" id="nav"></nav>
+<main id="main"></main>
+<script>
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids); return n; };
+
+// Grows each frame to its page's height, including after React renders inside it
+function autoHeight(frame, fallback) {
+  frame.style.height = `${fallback}px`;
+  frame.addEventListener('load', () => {
+    const doc = frame.contentDocument;
+    const fit = () => { frame.style.height = `${Math.max(doc.documentElement.scrollHeight, 120)}px`; };
+    fit();
+    new frame.contentWindow.ResizeObserver(fit).observe(doc.body);
+  });
+}
+
+fetch('_ds_manifest.json').then((r) => r.json()).then((m) => {
+  const groups = new Map();
+  for (const c of m.cards) groups.set(c.group, [...(groups.get(c.group) || []), c]);
+  const order = ['Components', 'Colors', 'Type', 'Motion', 'Brand'];
+  const names = [...groups.keys()].sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
+  names.push('Tokens');
+  groups.set('Tokens', [{ path: 'tokens-preview.html', name: 'All tokens', subtitle: 'Every primitive and pattern token on one page', viewport: '700x900' }]);
+
+  const nav = document.getElementById('nav');
+  const main = document.getElementById('main');
+  for (const g of names) {
+    nav.append(el('a', { href: `#${slug(g)}` }, el('span', { textContent: g })));
+    const section = el('section', { id: slug(g) }, el('h2', { textContent: g }));
+    for (const c of groups.get(g)) {
+      const h = Number((c.viewport || '700x400').split('x')[1]);
+      const frame = el('iframe', { src: c.path, title: c.name, loading: 'lazy' });
+      autoHeight(frame, h);
+      section.append(el('article', { className: 'card' },
+        el('h3', { textContent: c.name }),
+        ...(c.subtitle ? [el('p', { textContent: c.subtitle })] : []),
+        el('div', { className: 'frame' }, frame),
+        el('a', { href: c.path, textContent: `Open ${c.name} on its own` }),
+      ));
+    }
+    main.append(section);
+  }
+});
+</script>
+</body></html>

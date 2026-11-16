@@ -1,0 +1,62 @@
+.p5r-scope{
+/* base palette. "measured" = pixel count on real P5R sprites; "card" = carried over from reference/calling-card and reference/phansite-prototype */
+--red-500:#ff0000; /* measured signature red: logo, banner, large surfaces, red text on black */
+--red-600:#e3001b; /* card red: fill behind small white text (white on it = 4.9:1, on #ff0000 only 4.0:1) */
+--red-700:#a10014; /* card dark red: ring alternation, pressed */
+--red-card:#e20000; /* measured on tycoon cards */
+--rose-500:#f60257; /* measured tarot pink */
+--rose-600:#e00139; /* measured tarot shading */
+--black:#000000;
+--ink-900:#0b0b0b; /* default dark canvas */
+--ink-850:#140c0c; /* measured title banner dark */
+--ink-700:#2a2a2a;
+--grey-500:#8a8a8a;
+--grey-300:#c9c9c9;
+--white:#ffffff;
+--paper:#ebe2cc; /* ransom-note paper tile */
+--cyan-500:#00aeff; /* measured: selected-item accent on skill/item icons */
+--blue-700:#0050c3; /* measured */
+--yellow-400:#ffff00; /* measured: award notifications, "MONEY BONUS" labels */
+--yellow-300:#ffff31;
+
+/* semantic: surfaces */
+--surface-canvas: var(--ink-900);
+--surface-canvas-banner: var(--ink-850);
+--surface-panel-dark: var(--black);
+--surface-panel-light: var(--white);
+--surface-hover-dark: var(--ink-700);
+--surface-hero: var(--red-500);
+--surface-paper: var(--paper);
+--surface-overlay: rgba(0,0,0,.78);
+
+/* semantic: text */
+--text-on-dark: var(--white);
+--text-muted-on-dark: var(--grey-300);
+--text-subtle-on-dark: var(--grey-500); /* 5.7:1 on ink-900, ok for small text */
+--text-on-light: var(--black);
+--text-muted-on-light: var(--ink-700); /* 14.35:1 on white; grey-500 was only 3.45:1 */
+--text-on-red: var(--white); /* only on --red-600 or --red-700 at small sizes */
+--text-red-on-dark: var(--red-500); /* 5.25:1 on black */
+--text-red-on-light: var(--red-600); /* 4.9:1 on white */
+--text-on-yellow: var(--black);
+--text-error-on-dark: var(--yellow-400); /* 19.6:1 on black, 4.57:1 on red-600 */
+--text-error-on-light: var(--red-700); /* 8.3:1 on white */
+
+/* semantic: accents */
+--accent-primary: var(--red-600);
+--accent-primary-hover: var(--red-500);
+--accent-primary-press: var(--red-700);
+--accent-select: var(--cyan-500); /* the "selected" splash: strip, outline, underline */
+--accent-highlight: var(--yellow-400); /* callouts and notifications */
+--accent-tarot: var(--rose-500);
+
+/* semantic: strokes */
+--stroke-on-dark: var(--white);
+--stroke-on-light: var(--black);
+--border-subtle-on-dark: rgba(255,255,255,.16);
+
+/* status (only color use allowed outside red/black/white, per the Atlus rule: HP/SP and small highlights) */
+--status-hp: var(--red-500);
+--status-sp: var(--cyan-500);
+--status-progress: var(--yellow-400);
+}

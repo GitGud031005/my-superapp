@@ -1,0 +1,18 @@
+node_modules/
+dist/
+target/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.claude/settings.local.json
+.codegraph/
+
+# Persona 5 Royal game assets and old prototypes must never be committed
+packages/p5r-ds/assets/
+packages/p5r-ds/reference/

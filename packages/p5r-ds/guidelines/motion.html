@@ -1,0 +1,24 @@
+<!-- @dsCard group="Motion" viewport="700x300" name="Motion" subtitle="Chosen values inspired by the game. Only the day-change timing has a source" -->
+<html class="p5r-scope">
+<link rel="stylesheet" href="../styles.css">
+<link rel="icon" href="../assets/brand/phantom-thieves-logo.png">
+<style>
+body{margin:0;background:var(--surface-canvas);color:var(--text-on-dark);font:13px var(--font-body);padding:24px}
+table{border-collapse:collapse;width:100%}
+td,th{padding:7px 8px;border-bottom:1px solid var(--border-subtle-on-dark);text-align:left}
+th{color:var(--text-red-on-dark);font:400 13px var(--font-display);letter-spacing:.1em;text-transform:uppercase}
+code{color:var(--yellow-400)}
+</style>
+<table>
+  <tr><th>Token</th><th>Value</th><th>Source</th></tr>
+  <tr><td>--duration-fast</td><td><code>90ms</code></td><td>chosen. Hover lift, press, tab and menu selection</td></tr>
+  <tr><td>--duration-slow</td><td><code>320ms</code></td><td>chosen. Menu enter, dialog, toast</td></tr>
+  <tr><td>--duration-wipe</td><td><code>520ms</code></td><td>chosen. Screen wipes</td></tr>
+  <tr><td>--duration-pop</td><td><code>450ms</code></td><td>chosen. Ransom tile entry only (showpiece, not interface feedback)</td></tr>
+  <tr><td>--duration-flip</td><td><code>700ms</code></td><td>chosen. Calling card and tarot flips only (showpiece)</td></tr>
+  <tr><td>--stagger</td><td><code>40ms</code></td><td>chosen. Between menu items</td></tr>
+  <tr><td>--ease-snap</td><td><code>cubic-bezier(.2,.9,.1,1)</code></td><td>chosen. Fast start, soft landing</td></tr>
+  <tr><td>--ease-slam</td><td><code>cubic-bezier(.5,0,.1,1)</code></td><td>chosen. Slow wind-up, hard landing. Dialog entrance</td></tr>
+  <tr><td>day-change</td><td><code>6s + 2s + 4s</code></td><td>fan study, not from Atlus</td></tr>
+</table>
+<p style="color:var(--text-muted-on-dark);margin-top:14px">All animation is switched off under prefers-reduced-motion.</p>
