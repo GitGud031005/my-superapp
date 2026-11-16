@@ -1,5 +1,7 @@
 # my-superapp
 
+[![CI](https://github.com/GitGud031005/my-superapp/actions/workflows/ci.yml/badge.svg)](https://github.com/GitGud031005/my-superapp/actions/workflows/ci.yml)
+
 A personal superapp: a neutral shell that hosts several feature modules. Each module owns its own UI and its own slice of the backend.
 
 The first module, `phantom-ledger` (working name, not final), collects money friends owe and sends badminton invites. It is the only part of the app that uses the Persona 5 Royal design system.
@@ -17,7 +19,8 @@ my-superapp/
 │   └── p5r-ds/               Persona 5 Royal design system (tokens, React components, demos)
 ├── backend/                  Spring Boot modular monolith (Java 21, Maven, Spring Modulith)
 ├── infra/                    Docker Compose (Postgres, optional full stack) and kustomize for minikube
-└── .github/workflows/        planned: CI
+├── scripts/ci/               scripts that CI also runs locally
+└── .github/workflows/        CI
 ```
 
 ## Getting started
@@ -80,6 +83,28 @@ Tear down with `kubectl delete -k infra/k8s/overlays/minikube` (removes the name
 The backend takes about 20 s to start on an idle machine and several times that on a busy cluster; its startup probe allows five minutes.
 
 Phase 5 deploy note: Render builds the backend from this Dockerfile with Root Directory `backend` and Dockerfile path `./Dockerfile`.
+
+## CI
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request. A new push to the same ref cancels the run in progress.
+
+| Job | What it checks |
+| --- | --- |
+| `guard` | `scripts/ci/check-no-game-assets.sh`: nothing is tracked under `packages/p5r-ds/assets` or `packages/p5r-ds/reference`, and no png/jpg/gif/webp is tracked under `packages/p5r-ds`. The other three jobs wait for it |
+| `web` | `pnpm install --frozen-lockfile`, then `pnpm -r lint`, `typecheck`, `test`, `build`, then fails if `apps/web/dist` holds any image |
+| `backend` | `./mvnw -B verify` in `backend/` (Testcontainers uses the runner's Docker) |
+| `images` | builds both Docker images without pushing them, then fails if the web image holds any png/jpg/gif/webp |
+
+CI never pushes an image. Cloudflare Pages and Render build their own from this repo in phase 5.
+
+Run the checks locally from the repo root:
+
+```powershell
+bash scripts/ci/check-no-game-assets.sh          # Git Bash or WSL on PATH
+docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:1.7.12 -color
+```
+
+actionlint also runs shellcheck over the `run:` blocks. No output means no findings.
 
 ## Persona 5 Royal design system
 

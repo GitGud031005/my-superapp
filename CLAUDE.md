@@ -11,7 +11,7 @@ Personal superapp: a neutral shell that hosts feature modules. The first module 
 - `infra/compose.yaml`: local Postgres, read by Spring's docker-compose support. `backend` and `web` services sit behind `--profile full`, so dev only starts Postgres
 - `infra/k8s/`: kustomize `base/` plus `overlays/minikube/` (adds Postgres; `secrets.env` is gitignored, copy from `secrets.env.example`)
 - `backend/Dockerfile` (context `backend/`) and `apps/web/Dockerfile` (context repo root, nginx template in `apps/web/nginx/`)
-- `.github/workflows/` (planned): CI
+- `.github/workflows/ci.yml`: CI (see CI section); `scripts/ci/`: scripts the workflow calls and you can run locally
 
 Workspace tooling is pnpm; shared dev tooling (TypeScript, ESLint, Vitest) lives in the root `package.json`.
 
@@ -23,6 +23,16 @@ From the repo root:
 - `pnpm -r lint | typecheck | test | build`
 - Backend: `cd backend`, then `./mvnw spring-boot:run` or `./mvnw verify`. Both need Docker. Run `./mvnw clean` after deleting or renaming resources
 - Images: `docker build -t superapp-backend:dev backend`, `docker build -f apps/web/Dockerfile -t superapp-web:dev .`. Full stack: `docker compose -f infra/compose.yaml --profile full up --build` (web on :8088). Minikube flow is in README
+
+## CI
+
+One file, `.github/workflows/ci.yml`, with jobs `guard`, `web`, `backend`, `images`; the last three `needs: guard`.
+
+- `guard` runs `bash scripts/ci/check-no-game-assets.sh` (called through `bash`, so the exec bit does not matter). It fails if git tracks anything under `packages/p5r-ds/assets` or `reference`, or any png/jpg/gif/webp under `packages/p5r-ds`. Keep it passing; never weaken it.
+- `web` and `images` also fail if `apps/web/dist` or the built web image contain raster images.
+- Every action is pinned to a full commit SHA with a `# vX.Y.Z` comment. When bumping, update the SHA and the comment together, and resolve the SHA from the tag (`/repos/<owner>/<repo>/git/ref/tags/<tag>`; annotated tags need one more dereference to the commit). A tag name alone is never acceptable.
+- No image is pushed by design: `images` builds only (`push: false`). Cloudflare Pages and Render build their own from the repo.
+- Lint the workflow before committing: `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:1.7.12 -color` (PowerShell).
 
 ## Persona 5 Royal rule
 

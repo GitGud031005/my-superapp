@@ -5,7 +5,8 @@ COPY .mvn .mvn
 RUN ./mvnw -B dependency:go-offline
 COPY src src
 RUN ./mvnw -B package -DskipTests \
-    && java -Djarmode=tools -jar target/superapp-backend-0.0.1-SNAPSHOT.jar extract --layers --launcher --destination /workspace/extracted
+    && cp target/*.jar app.jar \
+    && java -Djarmode=tools -jar app.jar extract --layers --launcher --destination /workspace/extracted
 
 FROM eclipse-temurin:21.0.13_9-jre-noble
 RUN useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin app
