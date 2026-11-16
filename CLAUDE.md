@@ -8,7 +8,9 @@ Personal superapp: a neutral shell that hosts feature modules. The first module 
 - `modules/phantom-ledger/web` (`@superapp/phantom-ledger-web`): the module UI, the only consumer of the design system. Exports its source (`src/index.tsx`); the shell bundles it
 - `packages/p5r-ds` (`@superapp/p5r-ds`): Persona 5 Royal design system
 - `backend/`: Spring Boot modular monolith, Java 21, Maven, Spring Modulith, Flyway, Postgres. Base package `com.superapp`; each module is a subpackage (`ledger`, `shared`) with a `package-info.java`
-- `infra/compose.yaml`: local Postgres, read by Spring's docker-compose support. Kustomize for minikube is planned
+- `infra/compose.yaml`: local Postgres, read by Spring's docker-compose support. `backend` and `web` services sit behind `--profile full`, so dev only starts Postgres
+- `infra/k8s/`: kustomize `base/` plus `overlays/minikube/` (adds Postgres; `secrets.env` is gitignored, copy from `secrets.env.example`)
+- `backend/Dockerfile` (context `backend/`) and `apps/web/Dockerfile` (context repo root, nginx template in `apps/web/nginx/`)
 - `.github/workflows/` (planned): CI
 
 Workspace tooling is pnpm; shared dev tooling (TypeScript, ESLint, Vitest) lives in the root `package.json`.
@@ -19,7 +21,8 @@ From the repo root:
 
 - `pnpm install`, `pnpm dev` (shell on :5173, `/api` proxied to :8080)
 - `pnpm -r lint | typecheck | test | build`
-- Backend: `cd backend`, then `./mvnw spring-boot:run` or `./mvnw verify`. Both need Docker
+- Backend: `cd backend`, then `./mvnw spring-boot:run` or `./mvnw verify`. Both need Docker. Run `./mvnw clean` after deleting or renaming resources
+- Images: `docker build -t superapp-backend:dev backend`, `docker build -f apps/web/Dockerfile -t superapp-web:dev .`. Full stack: `docker compose -f infra/compose.yaml --profile full up --build` (web on :8088). Minikube flow is in README
 
 ## Persona 5 Royal rule
 

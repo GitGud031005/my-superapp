@@ -1,0 +1,11 @@
+**/node_modules
+**/dist
+**/target
+.git
+**/.env*
+**/*.tsbuildinfo
+.claude
+.codegraph
+packages/p5r-ds/assets
+packages/p5r-ds/reference
+**/secrets.env
