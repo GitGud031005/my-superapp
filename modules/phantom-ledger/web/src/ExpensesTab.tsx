@@ -24,7 +24,7 @@ export function AddExpenseTab() {
         {(members) =>
           members.length === 0 ? (
             <Panel title="No members yet">
-              <p>Add members first, or import your spreadsheet from the Import tab.</p>
+              <p>Add members first.</p>
             </Panel>
           ) : (
             <ExpenseForm

@@ -53,8 +53,8 @@ class LedgerApiTests extends LedgerTestSupport {
 
 	@ParameterizedTest
 	@ValueSource(strings = { "GET /api/ledger/admin/members", "POST /api/ledger/admin/members", "GET /api/ledger/admin/expenses",
-			"POST /api/ledger/admin/expenses", "POST /api/ledger/admin/payments", "POST /api/ledger/admin/import/dry-run",
-			"POST /api/ledger/admin/import/confirm", "GET /api/ledger/admin/members/00000000-0000-0000-0000-000000000001/history",
+			"POST /api/ledger/admin/expenses", "POST /api/ledger/admin/payments",
+			"GET /api/ledger/admin/members/00000000-0000-0000-0000-000000000001/history",
 			"PUT /api/ledger/admin/expenses/00000000-0000-0000-0000-000000000001",
 			"DELETE /api/ledger/admin/payments/00000000-0000-0000-0000-000000000001", "GET /api/ledger/admin/anything-else" })
 	void nonAdminsGet403OnEveryAdminEndpoint(String endpoint) throws Exception {

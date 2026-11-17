@@ -88,7 +88,7 @@ One creditor, the **admin**; everyone else is a **member** (a name plus an optio
 
 | Who | What they get |
 | --- | --- |
-| Admin | `Members`, `Add expense`, `Expenses` and `Import` tabs; the API under `/api/ledger/admin/**` |
+| Admin | `Members`, `Add expense` and `Expenses` tabs; the API under `/api/ledger/admin/**` |
 | Member whose Google email matches | `My ledger`: their balance and their own lines only. They never see other members, only the total share count of a group expense |
 | Any other signed-in user | "No ledger is linked to this account" |
 
@@ -101,7 +101,7 @@ LEDGER_ADMIN_EMAILS=you@example.com
 
 Where the variable lives: `.env` locally (the backend and the compose `backend` service both read it), the Render dashboard (`render.yaml` declares it with `sync: false`) and `ledger-admin-emails` in the minikube `secrets.env`. Empty means nobody is admin.
 
-**Expenses.** A *personal* expense is one member times one share. A *group* expense has a price per share and participants with their shares (a repeated name in the spreadsheet is more shares); the admin's own shares split the cost but create no debt. Entering a total instead gives `share = ceil(total / all shares)` rounded up to the next 1,000đ, and the form shows the difference before saving. Editing an expense changes every participant's line at once. Amount fields take `56k`, `56000` or `56.000`.
+**Expenses.** A *personal* expense is one member times one share. A *group* expense has a price per share and participants with their shares (a person can take more than one share); the admin's own shares split the cost but create no debt. Entering a total instead gives `share = ceil(total / all shares)` rounded up to the next 1,000đ, and the form shows the difference before saving. Editing an expense changes every participant's line at once. Amount fields take `56k`, `56000` or `56.000`.
 
 **API** (all authenticated, CSRF as for the rest of `/api`):
 
@@ -111,19 +111,6 @@ Where the variable lives: `.env` locally (the backend and the compose `backend` 
 | `GET/POST /api/ledger/admin/members`, `PUT/DELETE .../members/{id}`, `GET .../members/{id}/history` | members with balances (delete only when they have no entries) |
 | `GET/POST /api/ledger/admin/expenses`, `PUT/DELETE .../expenses/{id}` | expenses, newest first (`limit`, `offset`) |
 | `POST /api/ledger/admin/payments`, `PUT/DELETE .../payments/{id}` | payments |
-| `POST /api/ledger/admin/import/dry-run` and `.../import/confirm` | multipart `file`; see below |
-
-### Import the spreadsheet
-
-In Excel use File, Save As, **CSV UTF-8 (Comma delimited)**, then open the ledger as admin, go to **Import** and pick the file. The backend reads column B (date such as `t3 9/1/24`), C (price per person such as `23k`), D (participants, a repeated name is another share) and E (free-form `name expr name expr`, e.g. `chi 30k+45k-20k binh -270k`); every other column, including bank and momo numbers, is ignored.
-
-- Dated rows with C and D become group expenses with the note "Badminton". D lists the people who have not paid yet, so a dated row with a price and no names (everyone paid) creates nothing and is not reported.
-- Every positive term in E becomes a personal expense ("Other charge (from Excel)"), every negative term a payment ("Deducted (from Excel)"). A row with only E takes the date of the nearest dated row above.
-- **Check file** is a dry run without a mapping: it lists every distinct name found in the sheet with how often it appears, the counts, and the rows it could not read, with row numbers. Nothing is written.
-- **Map the names.** For each name choose *A member* (type the member's name; a name that matches an existing member reuses it), *The same person as another name* (its shares and payments are added to that member; two names in one cell add up) or *Not a person, ignore* (its shares and amounts are dropped and listed). Every name needs a choice. **Preview balances** runs the dry run again with the mapping and shows each resulting member's balance, so you can check it against reality.
-- **Import everything** re-reads the same file with the same mapping, creates the missing members (no email) and writes everything in one transaction. It refuses if the ledger already has any expense or payment, so nothing is duplicated. The mapping is never stored, and spreadsheet names are not kept anywhere.
-
-The spreadsheet and anything derived from it must never be committed: this repository is public.
 
 ## Containers
 

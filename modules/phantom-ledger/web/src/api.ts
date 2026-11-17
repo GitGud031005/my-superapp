@@ -81,38 +81,6 @@ export interface PaymentInput {
   note: string;
 }
 
-export interface DetectedName {
-  name: string;
-  expenses: number;
-  payments: number;
-}
-
-export interface MappingEntry {
-  source: string;
-  action: 'NEW' | 'MERGE' | 'IGNORE';
-  name?: string;
-  into?: string;
-}
-
-export interface ImportMember {
-  name: string;
-  exists: boolean;
-  expenses: number;
-  payments: number;
-  balance: number;
-}
-
-export interface ImportPreview {
-  ledgerEmpty: boolean;
-  groupExpenses: number;
-  personalExpenses: number;
-  payments: number;
-  names: DetectedName[];
-  members: ImportMember[];
-  ignored: DetectedName[];
-  problems: { row: number; reason: string }[];
-}
-
 export class ApiError extends Error {
   readonly status: number;
 
@@ -154,10 +122,3 @@ export const deleteExpense = (id: string) => request<void>('DELETE', `${ADMIN}/e
 export const createPayment = (input: PaymentInput) => request<Payment>('POST', `${ADMIN}/payments`, null, input);
 export const updatePayment = (id: string, input: PaymentInput) => request<Payment>('PUT', `${ADMIN}/payments/${id}`, null, input);
 export const deletePayment = (id: string) => request<void>('DELETE', `${ADMIN}/payments/${id}`);
-
-export function importCsv(step: 'dry-run' | 'confirm', file: File, mapping?: MappingEntry[]): Promise<ImportPreview> {
-  const form = new FormData();
-  form.append('file', file);
-  if (mapping) form.append('mapping', new Blob([JSON.stringify(mapping)], { type: 'application/json' }));
-  return request<ImportPreview>('POST', `${ADMIN}/import/${step}`, form);
-}

@@ -1,6 +1,5 @@
 package com.superapp.ledger;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,15 +14,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.superapp.ledger.LedgerApi.Expense;
 import com.superapp.ledger.LedgerApi.ExpenseInput;
-import com.superapp.ledger.LedgerApi.ImportPreview;
-import com.superapp.ledger.LedgerApi.MappingEntry;
 import com.superapp.ledger.LedgerApi.Member;
 import com.superapp.ledger.LedgerApi.MemberHistory;
 import com.superapp.ledger.LedgerApi.MemberInput;
@@ -36,11 +31,8 @@ class AdminController {
 
 	private final LedgerService service;
 
-	private final ImportService imports;
-
-	AdminController(LedgerService service, ImportService imports) {
+	AdminController(LedgerService service) {
 		this.service = service;
-		this.imports = imports;
 	}
 
 	@GetMapping("/members")
@@ -107,18 +99,6 @@ class AdminController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	void deletePayment(@PathVariable UUID id) {
 		service.deletePayment(id);
-	}
-
-	@PostMapping("/import/dry-run")
-	ImportPreview dryRun(@RequestParam("file") MultipartFile file,
-			@RequestPart(name = "mapping", required = false) List<@Valid MappingEntry> mapping) throws IOException {
-		return imports.dryRun(file.getBytes(), mapping);
-	}
-
-	@PostMapping("/import/confirm")
-	ImportPreview confirm(@RequestParam("file") MultipartFile file,
-			@RequestPart(name = "mapping", required = false) List<@Valid MappingEntry> mapping) throws IOException {
-		return imports.confirm(file.getBytes(), mapping);
 	}
 
 }

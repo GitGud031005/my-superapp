@@ -204,29 +204,6 @@
   font-weight: var(--weight-body-strong);
 }
 
-.phantom-ledger__file {
-  inline-size: 100%;
-  min-inline-size: 0;
-  font: var(--weight-body) var(--text-body-md) / var(--leading-normal) var(--font-body);
-}
-
-.phantom-ledger__file::file-selector-button {
-  margin-inline-end: var(--space-3);
-  padding: var(--space-2) var(--space-4);
-  border: 0;
-  background: var(--surface-panel-dark);
-  color: var(--text-on-dark);
-  font: 400 var(--text-body-sm) / 1 var(--font-display);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.phantom-ledger__file:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 4px;
-}
-
 @media (max-width: 480px) {
   .phantom-ledger__page {
     padding-inline: var(--space-4);

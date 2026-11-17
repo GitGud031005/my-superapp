@@ -4,7 +4,6 @@ import { getMyLedger } from './api';
 import { AddExpenseTab, ExpensesTab } from './ExpensesTab';
 import { useLoad } from './hooks';
 import { Loaded } from './Loaded';
-import { ImportTab } from './ImportTab';
 import { MembersTab } from './MembersTab';
 import { MyLedger, Unlinked } from './MyLedger';
 
@@ -12,7 +11,6 @@ const ADMIN_TABS = [
   { id: 'members', label: 'Members' },
   { id: 'add', label: 'Add expense' },
   { id: 'expenses', label: 'Expenses' },
-  { id: 'import', label: 'Import' },
 ];
 
 export function Ledger({ email }: { email: string }) {
@@ -29,7 +27,6 @@ export function Ledger({ email }: { email: string }) {
           members: () => <MembersTab />,
           add: () => <AddExpenseTab />,
           expenses: () => <ExpensesTab />,
-          import: () => <ImportTab />,
         };
 
         if (tabs.length === 0) return <Unlinked email={email} />;

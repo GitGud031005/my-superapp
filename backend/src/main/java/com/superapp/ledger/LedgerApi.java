@@ -87,28 +87,4 @@ final class LedgerApi {
 
 	}
 
-	record DetectedName(String name, int expenses, int payments) {
-
-	}
-
-	enum MappingAction {
-		NEW, MERGE, IGNORE
-	}
-
-	/** What to do with one name found in the spreadsheet: a member called {@code name}, merged into another name, or dropped. */
-	record MappingEntry(@NotBlank @Size(max = 200) String source, @NotNull MappingAction action, @Size(max = 60) String name,
-			@Size(max = 200) String into) {
-
-	}
-
-	record ImportMember(String name, boolean exists, int expenses, int payments, long balance) {
-
-	}
-
-	/** {@code members} and {@code ignored} stay empty until a mapping is given; the counts then exclude what was ignored. */
-	record ImportPreview(boolean ledgerEmpty, int groupExpenses, int personalExpenses, int payments, List<DetectedName> names,
-			List<ImportMember> members, List<DetectedName> ignored, List<SpreadsheetParser.Problem> problems) {
-
-	}
-
 }

@@ -309,7 +309,7 @@ export function MembersTab() {
       <Loaded load={load} onRetry={reload}>
         {(members) =>
           members.length === 0 ? (
-            <p>No members yet. Add one, or import your spreadsheet from the Import tab.</p>
+            <p>No members yet. Add one to get started.</p>
           ) : (
             <ul className="phantom-ledger__list">
               {members.map((member) => (

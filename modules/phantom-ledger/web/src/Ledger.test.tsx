@@ -104,12 +104,12 @@ describe('friend view', () => {
 });
 
 describe('admin view', () => {
-  it('shows the four admin tabs, opening on Members', async () => {
+  it('shows the three admin tabs, opening on Members', async () => {
     stubApi({ 'GET /api/ledger/me': adminMe, 'GET /api/ledger/admin/members': respond(200, members) });
     render(<Ledger email="boss@example.com" />);
 
     const tabs = await screen.findAllByRole('tab');
-    expect(tabs.map((tab) => tab.textContent)).toEqual(['Members', 'Add expense', 'Expenses', 'Import']);
+    expect(tabs.map((tab) => tab.textContent)).toEqual(['Members', 'Add expense', 'Expenses']);
     expect(await screen.findByText('Anna')).toBeInTheDocument();
     expect(screen.getByText('Owes 30.000đ')).toBeInTheDocument();
     expect(screen.getByText('Ahead 5.000đ')).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe('admin view', () => {
     render(<Ledger email="boss@example.com" />);
 
     const tabs = await screen.findAllByRole('tab');
-    expect(tabs.map((tab) => tab.textContent)).toEqual(['Members', 'Add expense', 'Expenses', 'Import', 'My ledger']);
+    expect(tabs.map((tab) => tab.textContent)).toEqual(['Members', 'Add expense', 'Expenses', 'My ledger']);
   });
 
   it('records a payment typed as 56k with the CSRF header', async () => {
@@ -242,133 +242,5 @@ describe('admin view', () => {
 
     expect(await screen.findByText(/No expenses have been recorded/)).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith('/api/ledger/admin/expenses/e-1', expect.objectContaining({ method: 'DELETE' }));
-  });
-
-  it('maps every detected name, previews the balances and only then imports', async () => {
-    const detected = {
-      ledgerEmpty: true,
-      groupExpenses: 2,
-      personalExpenses: 4,
-      payments: 2,
-      names: [
-        { name: 'an', expenses: 3, payments: 0 },
-        { name: 'anx', expenses: 1, payments: 1 },
-        { name: 'joke', expenses: 1, payments: 0 },
-      ],
-      members: [],
-      ignored: [],
-      problems: [{ row: 6, reason: 'Unrecognised date "t4 99/9/24"' }],
-    };
-    const mapped = {
-      ...detected,
-      members: [{ name: 'Ann', exists: false, expenses: 4, payments: 1, balance: -222000 }],
-      ignored: [{ name: 'joke', expenses: 1, payments: 0 }],
-    };
-    const fetchMock = stubApi({
-      'GET /api/ledger/me': adminMe,
-      'GET /api/ledger/admin/members': respond(200, members),
-      'POST /api/ledger/admin/import/dry-run': (init) => respond(200, (init?.body as FormData).has('mapping') ? mapped : detected),
-      'POST /api/ledger/admin/import/confirm': respond(200, mapped),
-    });
-    render(<Ledger email="boss@example.com" />);
-
-    fireEvent.click(await screen.findByRole('tab', { name: 'Import' }));
-    expect(screen.getByRole('button', { name: 'Check file' })).toBeDisabled();
-    fireEvent.change(screen.getByLabelText('CSV file'), { target: { files: [new File(['No,Date\n'], 'ledger.csv', { type: 'text/csv' })] } });
-    fireEvent.click(screen.getByRole('button', { name: 'Check file' }));
-
-    const an = await screen.findByRole('group', { name: /^an ·/ });
-    const anx = screen.getByRole('group', { name: /^anx ·/ });
-    const joke = screen.getByRole('group', { name: /^joke ·/ });
-    expect(screen.getByRole('button', { name: 'Preview balances' })).toBeDisabled();
-
-    fireEvent.change(within(an).getByLabelText('Member name'), { target: { value: 'Ann' } });
-    fireEvent.change(within(anx).getByLabelText('What is it'), { target: { value: 'MERGE' } });
-    fireEvent.change(within(anx).getByLabelText('Merge into'), { target: { value: 'an' } });
-    fireEvent.change(within(joke).getByLabelText('What is it'), { target: { value: 'IGNORE' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Preview balances' }));
-
-    expect(await screen.findByText('-222.000đ')).toBeInTheDocument();
-    expect(screen.getByText('New member')).toBeInTheDocument();
-    expect(screen.getByText('joke: 1 expense and 0 payments dropped')).toBeInTheDocument();
-    expect(screen.getByText('Row 6: Unrecognised date "t4 99/9/24"')).toBeInTheDocument();
-    expect(fetchMock.mock.calls.some(([url]) => url === '/api/ledger/admin/import/confirm')).toBe(false);
-    const preview = fetchMock.mock.calls.filter(([url]) => url === '/api/ledger/admin/import/dry-run').at(-1)?.[1] as RequestInit;
-    const sent = await ((preview.body as FormData).get('mapping') as Blob).text();
-    expect(JSON.parse(sent)).toEqual([
-      { source: 'an', action: 'NEW', name: 'Ann' },
-      { source: 'anx', action: 'MERGE', into: 'an' },
-      { source: 'joke', action: 'IGNORE' },
-    ]);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Import everything' }));
-
-    expect(await screen.findByText('Import finished')).toBeInTheDocument();
-    const upload = fetchMock.mock.calls.find(([url]) => url === '/api/ledger/admin/import/confirm')?.[1] as RequestInit;
-    expect((upload.body as FormData).has('mapping')).toBe(true);
-  });
-
-  it('does not let a name merge into a name that is itself merged or ignored', async () => {
-    stubApi({
-      'GET /api/ledger/me': adminMe,
-      'GET /api/ledger/admin/members': respond(200, members),
-      'POST /api/ledger/admin/import/dry-run': respond(200, {
-        ledgerEmpty: true,
-        groupExpenses: 1,
-        personalExpenses: 0,
-        payments: 0,
-        names: [
-          { name: 'an', expenses: 1, payments: 0 },
-          { name: 'anx', expenses: 1, payments: 0 },
-        ],
-        members: [],
-        ignored: [],
-        problems: [],
-      }),
-    });
-    render(<Ledger email="boss@example.com" />);
-
-    fireEvent.click(await screen.findByRole('tab', { name: 'Import' }));
-    fireEvent.change(screen.getByLabelText('CSV file'), { target: { files: [new File(['x'], 'ledger.csv')] } });
-    fireEvent.click(screen.getByRole('button', { name: 'Check file' }));
-    const an = await screen.findByRole('group', { name: /^an ·/ });
-    const anx = screen.getByRole('group', { name: /^anx ·/ });
-
-    fireEvent.change(within(an).getByLabelText('Member name'), { target: { value: 'Ann' } });
-    fireEvent.change(within(anx).getByLabelText('What is it'), { target: { value: 'MERGE' } });
-    fireEvent.change(within(anx).getByLabelText('Merge into'), { target: { value: 'an' } });
-    expect(screen.getByRole('button', { name: 'Preview balances' })).toBeEnabled();
-
-    fireEvent.change(within(an).getByLabelText('What is it'), { target: { value: 'IGNORE' } });
-    expect(screen.getByRole('button', { name: 'Preview balances' })).toBeDisabled();
-  });
-
-  it('refuses to offer an import when the ledger already has data', async () => {
-    const names = [{ name: 'an', expenses: 1, payments: 0 }];
-    stubApi({
-      'GET /api/ledger/me': adminMe,
-      'GET /api/ledger/admin/members': respond(200, members),
-      'POST /api/ledger/admin/import/dry-run': (init) =>
-        respond(200, {
-          ledgerEmpty: false,
-          groupExpenses: 1,
-          personalExpenses: 0,
-          payments: 0,
-          names,
-          members: (init?.body as FormData).has('mapping') ? [{ name: 'Ann', exists: false, expenses: 1, payments: 0, balance: 1000 }] : [],
-          ignored: [],
-          problems: [],
-        }),
-    });
-    render(<Ledger email="boss@example.com" />);
-
-    fireEvent.click(await screen.findByRole('tab', { name: 'Import' }));
-    fireEvent.change(screen.getByLabelText('CSV file'), { target: { files: [new File(['x'], 'ledger.csv')] } });
-    fireEvent.click(screen.getByRole('button', { name: 'Check file' }));
-    fireEvent.change(within(await screen.findByRole('group', { name: /^an ·/ })).getByLabelText('Member name'), { target: { value: 'Ann' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Preview balances' }));
-
-    expect(await screen.findByText(/already has expenses or payments/)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Import everything' })).not.toBeInTheDocument();
   });
 });

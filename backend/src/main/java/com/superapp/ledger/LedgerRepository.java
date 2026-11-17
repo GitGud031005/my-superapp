@@ -254,14 +254,4 @@ class LedgerRepository {
 				rs.getLong("amount"), rs.getString("note"));
 	}
 
-	boolean hasEntries() {
-		return jdbc.sql("SELECT EXISTS (SELECT 1 FROM ledger.expense) OR EXISTS (SELECT 1 FROM ledger.payment)")
-			.query(Boolean.class)
-			.single();
-	}
-
-	void lockEntries() {
-		jdbc.sql("LOCK TABLE ledger.expense, ledger.payment IN EXCLUSIVE MODE").update();
-	}
-
 }
