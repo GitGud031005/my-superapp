@@ -21,3 +21,7 @@ packages/p5r-ds/reference/
 
 # Local minikube credentials (copy from secrets.env.example)
 infra/k8s/overlays/minikube/secrets.env
+
+# Cloudflare Wrangler local state and secrets
+.wrangler/
+.dev.vars

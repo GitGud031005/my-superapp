@@ -33,6 +33,10 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
   {
+    files: ['apps/web/worker/**'],
+    languageOptions: { globals: globals.serviceworker },
+  },
+  {
     files: ['modules/phantom-ledger/**'],
     rules: { 'no-restricted-imports': 'off' },
   },

@@ -11,6 +11,7 @@ Personal superapp: a neutral shell that hosts feature modules. The first module 
 - `infra/compose.yaml`: local Postgres, read by Spring's docker-compose support. `backend` and `web` services sit behind `--profile full`, so dev only starts Postgres
 - `infra/k8s/`: kustomize `base/` plus `overlays/minikube/` (adds Postgres; `secrets.env` is gitignored, copy from `secrets.env.example`)
 - `backend/Dockerfile` (context `backend/`) and `apps/web/Dockerfile` (context repo root, nginx template in `apps/web/nginx/`)
+- `render.yaml`: Render Blueprint for the backend; `apps/web/wrangler.jsonc` + `apps/web/worker/`: Cloudflare Worker (see Deploy section)
 - `.github/workflows/ci.yml`: CI (see CI section); `scripts/ci/`: scripts the workflow calls and you can run locally
 
 Workspace tooling is pnpm; shared dev tooling (TypeScript, ESLint, Vitest) lives in the root `package.json`.
@@ -33,6 +34,17 @@ One file, `.github/workflows/ci.yml`, with jobs `guard`, `web`, `backend`, `imag
 - Every action is pinned to a full commit SHA with a `# vX.Y.Z` comment. When bumping, update the SHA and the comment together, and resolve the SHA from the tag (`/repos/<owner>/<repo>/git/ref/tags/<tag>`; annotated tags need one more dereference to the commit). A tag name alone is never acceptable.
 - No image is pushed by design: `images` builds only (`push: false`). Cloudflare Pages and Render build their own from the repo.
 - Lint the workflow before committing: `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:1.7.12 -color` (PowerShell).
+
+## Deploy
+
+Worker (Cloudflare Workers static assets, `apps/web`) serves `dist/` and proxies `/api/*` to the Render backend (Docker, free, `prod` profile), which uses Neon Postgres. Setup order, values and rollback are in README "Deploy". Nothing deploys from CI.
+
+- The Worker's `scheduled` cron (every 10 min) keeps Render awake by calling `/actuator/health/liveness`. Never point it at an endpoint that touches the database, or Neon can no longer suspend.
+- Readiness (`/actuator/health/readiness`, Render's health check) must not include `db`. Probes are enabled explicitly in `application.yaml` because Spring only auto-enables them on Kubernetes.
+- Flyway runs on the Neon **direct** host, never `-pooler` (session locks). JDBC URL: `jdbc:postgresql://<host>/<db>?sslmode=require&channelBinding=require`.
+- `vars.API_ORIGIN` in `wrangler.jsonc` must be the real Render URL. Static assets are served without running the Worker, so headers for them come from `apps/web/public/_headers`; responses the Worker builds get none.
+- `apps/web/worker` has its own tsconfig (`tsconfig.worker.json`, Workers types, no DOM). The `typecheck` script runs both.
+- Local Worker: `pnpm --filter @superapp/web exec wrangler dev` after a build. Never run `wrangler login` or `wrangler deploy` locally; Workers Builds deploys.
 
 ## Persona 5 Royal rule
 

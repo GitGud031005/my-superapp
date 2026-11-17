@@ -1,0 +1,12 @@
+spring:
+  docker:
+    compose:
+      enabled: false
+  main:
+    lazy-initialization: true
+  datasource:
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 0
+      idle-timeout: 60000
+      max-lifetime: 240000

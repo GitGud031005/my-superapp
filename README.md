@@ -95,7 +95,7 @@ Phase 5 deploy note: Render builds the backend from this Dockerfile with Root Di
 | `backend` | `./mvnw -B verify` in `backend/` (Testcontainers uses the runner's Docker) |
 | `images` | builds both Docker images without pushing them, then fails if the web image holds any png/jpg/gif/webp |
 
-CI never pushes an image. Cloudflare Pages and Render build their own from this repo in phase 5.
+CI never pushes an image. Render builds the backend image itself and Cloudflare Workers Builds builds the web app (see Deploy).
 
 Run the checks locally from the repo root:
 
@@ -105,6 +105,72 @@ docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:1.7.12 -color
 ```
 
 actionlint also runs shellcheck over the `run:` blocks. No output means no findings.
+
+## Deploy
+
+All three pieces run on free tiers. Nothing is deployed from CI; each service builds from this repo.
+
+```
+browser ──> Cloudflare Worker "my-superapp-web" ──/api/*──> Render web service (Docker, Singapore) ──JDBC──> Neon Postgres 17 (ap-southeast-1)
+              serves apps/web/dist (static assets)            my-superapp-backend, spins down after 15 min idle
+              cron every 10 min ──> GET /actuator/health/liveness
+```
+
+The browser only ever talks to the Worker, so `/api` is same-origin and the backend needs no CORS. Static asset requests are free and unlimited; the Worker only runs for `/api/*` and for the cron.
+
+### Order of setup
+
+1. **Neon** (database). Create a project, Postgres 17, region `aws-ap-southeast-1`. Copy the **direct** connection host (the one without `-pooler`): Flyway takes session-level locks, which the pooler does not support. Build the JDBC URL as
+   `jdbc:postgresql://<host>/<database>?sslmode=require&channelBinding=require`
+   and keep the user and password separate (Neon's connection string is `postgresql://user:password@host/db`; do not paste that form into Spring). Compute suspends after 5 minutes idle and wakes on the next connection.
+2. **Render** (backend). New → Blueprint → pick this repo; it reads `render.yaml`. Render asks for the three `sync: false` variables:
+   - `SPRING_DATASOURCE_URL`: the JDBC URL from step 1
+   - `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`: from Neon
+   The first start runs Flyway against Neon. The service is `my-superapp-backend`; note its URL (`https://<name>.onrender.com`; Render appends a suffix if the name is taken).
+3. **Cloudflare Workers Builds** (web). Workers & Pages → Create → Import a repository → this repo, then:
+   - Project/Worker name: `my-superapp-web` (must equal `name` in `apps/web/wrangler.jsonc`)
+   - Production branch: `main`
+   - Root directory: `/`
+   - Build command: `pnpm install --frozen-lockfile && pnpm --filter @superapp/web build`
+   - Deploy command: `pnpm --filter @superapp/web exec wrangler deploy`
+   Workers Builds defaults to Node 24 and reads `packageManager` for pnpm, so no `.node-version` file is needed.
+4. **Point the Worker at the real backend.** `apps/web/wrangler.jsonc` ships with the placeholder `API_ORIGIN` `https://my-superapp-backend.onrender.com`. If the Render URL differs, change `vars.API_ORIGIN` there, commit, and let Workers Builds redeploy.
+5. Open the `*.workers.dev` URL: `/` is the neutral shell, `/ledger` the module, `/api/...` reaches Spring.
+
+### Environment
+
+| Where | Variable | Value |
+| --- | --- | --- |
+| Render | `SPRING_PROFILES_ACTIVE` | `prod` (set by the Blueprint) |
+| Render | `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | Neon direct host, see above |
+| Render | `PORT` | set by Render (10000); `server.port` reads it |
+| Worker | `API_ORIGIN` | plain var in `wrangler.jsonc`, not a secret |
+
+The `prod` profile (`application-prod.yaml`) caps Hikari at 5 connections with `minimum-idle: 0`, a 60 s idle timeout and a 240 s max lifetime, so idle connections do not keep Neon awake or break across its suspend. The profile also sets `spring.main.lazy-initialization`, which cut startup in a 512 MB / 0.1 CPU container from about 185 s to about 155 s; the image's JVM flags (`MaxRAMPercentage=60`, SerialGC, `TieredStopAtLevel=1`, `-Xss512k`) keep it near 215 MiB. Expect a cold start of roughly 2.5 minutes on Render's free CPU, and the first request after it is fast. Render checks `/actuator/health/readiness`, which does not include the database.
+
+### Keep-warm cron
+
+Render's free service sleeps after 15 minutes without traffic and then takes minutes to boot on 0.1 CPU. The Worker's cron trigger (`*/10 * * * *`) requests `/actuator/health/liveness` on the backend. That endpoint never touches the database, so Neon still suspends when nobody uses the app. Keeping one instance up around the clock is about 744 h a month against Render's 750 free hours. Never point the cron at an endpoint that queries the database.
+
+Render's free tier caps outbound bandwidth at 5 GB a month. Static files come from Cloudflare, so only `/api` responses count against it.
+
+### Rollback
+
+- Render: service → Events/Deploys → pick the previous deploy → Rollback.
+- Cloudflare: Worker → Deployments → pick the previous version → Rollback.
+- Database migrations are not rolled back automatically; Flyway only moves forward.
+
+### Local checks
+
+```powershell
+pnpm --filter @superapp/web build
+pnpm --filter @superapp/web exec wrangler dev --var API_ORIGIN:http://localhost:8081 --test-scheduled   # needs the backend on :8081
+curl "http://localhost:8787/cdn-cgi/local/scheduled?cron=*/10+*+*+*+*"                                   # runs the keep-warm handler
+```
+
+`pnpm --filter @superapp/web worker:dev` runs plain `wrangler dev` against the placeholder origin. `dist/` must exist first.
+
+The Persona 5 Royal game images never reach any of these: they are gitignored, excluded from every build context, never copied into `dist/`, and CI fails if `dist/` or the web image holds a raster image. Render only receives `backend/`.
 
 ## Persona 5 Royal design system
 
