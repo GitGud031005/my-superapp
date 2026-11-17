@@ -7,7 +7,7 @@ Personal superapp: a neutral shell that hosts feature modules. The first module 
 - `apps/web` (`@superapp/web`): Vite + React + TS shell, neutral styling. Routes: `/` lists modules, `/ledger/*` lazy-loads `@superapp/phantom-ledger-web`
 - `modules/phantom-ledger/web` (`@superapp/phantom-ledger-web`): the module UI, the only consumer of the design system. Exports its source (`src/index.tsx`); the shell bundles it
 - `packages/p5r-ds` (`@superapp/p5r-ds`): Persona 5 Royal design system
-- `backend/`: Spring Boot modular monolith, Java 21, Maven, Spring Modulith, Flyway, Postgres. Base package `com.superapp`; each module is a subpackage (`ledger`, `shared`) with a `package-info.java`
+- `backend/`: Spring Boot modular monolith, Java 21, Maven, Spring Modulith, Flyway, Postgres. Base package `com.superapp`; each module is a subpackage (`ledger`, `identity`, `shared`) with a `package-info.java`
 - `infra/compose.yaml`: local Postgres, read by Spring's docker-compose support. `backend` and `web` services sit behind `--profile full`, so dev only starts Postgres
 - `infra/k8s/`: kustomize `base/` plus `overlays/minikube/` (adds Postgres; `secrets.env` is gitignored, copy from `secrets.env.example`)
 - `backend/Dockerfile` (context `backend/`) and `apps/web/Dockerfile` (context repo root, nginx template in `apps/web/nginx/`)
@@ -45,6 +45,17 @@ Worker (Cloudflare Workers static assets, `apps/web`) serves `dist/` and proxies
 - `vars.API_ORIGIN` in `wrangler.jsonc` must be the real Render URL. Static assets are served without running the Worker, so headers for them come from `apps/web/public/_headers`; responses the Worker builds get none.
 - `apps/web/worker` has its own tsconfig (`tsconfig.worker.json`, Workers types, no DOM). The `typecheck` script runs both.
 - Local Worker: `pnpm --filter @superapp/web exec wrangler dev` after a build. Never run `wrangler login` or `wrangler deploy` locally; Workers Builds deploys.
+
+## Identity (Google login)
+
+Backend module `com.superapp.identity` owns sign-in: `app_user`, the Spring Session JDBC tables (`identity.spring_session`, created by `V2__create_identity.sql`, never `initialize-schema`) and the security filter chain. Boot 4 needs `spring-boot-starter-session-jdbc`, not bare `spring-session-jdbc`.
+
+- Every OAuth endpoint lives under `/api` (`/api/oauth2/authorization/google`, `/api/login/oauth2/code/*`), because the Worker proxies only `/api/*`. The post-login target is `/ledger`. Do not move them.
+- `spring.session.jdbc.cleanup-cron` is `"-"`. The default every-minute cleanup would keep Neon awake forever. Never re-enable it, and never add a timer that touches the database. `IdentityApiTests` fails if any scheduled task appears.
+- Anonymous requests must not create sessions or touch the DB: the request cache is disabled and `/api/me` answers 401 JSON, never a redirect. Keep it that way for any new endpoint.
+- CSRF is `csrf.spa()`: cookie `XSRF-TOKEN`, header `X-XSRF-TOKEN`. New unsafe endpoints need no extra work; the UI helper is `modules/phantom-ledger/web/src/auth.ts`.
+- Credentials are `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: gitignored `.env` locally (`.env.example` is committed), Render dashboard in prod (`render.yaml`, `sync: false`), `secrets.env` on minikube. Tests and CI use the `not-configured` placeholder; `prod` has no default. Never commit real values.
+- Other modules that need the current user must go through an API exposed from `identity`, not its tables.
 
 ## Persona 5 Royal rule
 

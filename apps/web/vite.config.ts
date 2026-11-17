@@ -37,7 +37,17 @@ function p5rAssets(): Plugin {
 export default defineConfig({
   plugins: [react(), p5rAssets()],
   server: {
-    proxy: { '/api': 'http://localhost:8080' },
+    proxy: {
+      '/api': {
+        target: process.env.API_PROXY_TARGET ?? 'http://localhost:8080',
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            proxyReq.setHeader('X-Forwarded-Host', req.headers.host ?? '');
+            proxyReq.setHeader('X-Forwarded-Proto', 'http');
+          });
+        },
+      },
+    },
   },
   test: {
     environment: 'jsdom',

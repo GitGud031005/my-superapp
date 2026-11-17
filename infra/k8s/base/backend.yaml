@@ -39,6 +39,18 @@ spec:
                 secretKeyRef:
                   name: backend-db
                   key: password
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backend-db
+                  key: google-client-id
+                  optional: true
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-db
+                  key: google-client-secret
+                  optional: true
           resources:
             requests:
               cpu: 100m

@@ -1,9 +1,17 @@
 server:
   port: ${PORT:8080}
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
 
 spring:
   application:
     name: superapp
+  config:
+    import: optional:file:../.env[.properties]
   docker:
     compose:
       file: ../infra/compose.yaml
@@ -11,6 +19,21 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:not-configured}
+            client-secret: ${GOOGLE_CLIENT_SECRET:not-configured}
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/api/login/oauth2/code/{registrationId}"
+  session:
+    timeout: 14d
+    jdbc:
+      table-name: identity.spring_session
+      initialize-schema: never
+      cleanup-cron: "-"
 
 management:
   endpoint:

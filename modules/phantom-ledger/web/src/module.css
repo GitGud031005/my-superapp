@@ -16,6 +16,16 @@
   gap: var(--space-4);
 }
 
-.phantom-ledger__stack p {
+.phantom-ledger__stack p,
+.phantom-ledger__account p,
+.phantom-ledger__status {
   margin: 0;
+}
+
+.phantom-ledger__account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
 }

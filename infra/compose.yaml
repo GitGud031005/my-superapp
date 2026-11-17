@@ -19,6 +19,9 @@ services:
     profiles: [full]
     build:
       context: ../backend
+    env_file:
+      - path: ../.env
+        required: false
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/superapp
       SPRING_DATASOURCE_USERNAME: superapp

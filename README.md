@@ -40,9 +40,47 @@ cd backend
 ./mvnw verify                  # modularity check and context load against a Testcontainers Postgres
 ```
 
+Sign-in needs Google credentials, see [Google login](#google-login). Without them the app still starts and everything except signing in works.
+
 Check the API with `curl localhost:8080/actuator/health`. Stop the local database with `docker compose -f infra/compose.yaml down`; the data volume is kept.
 
 After deleting or renaming anything in `backend/src/main/resources`, run `./mvnw clean`; stale copies stay in `target/classes` and can break Flyway.
+
+## Google login
+
+The `identity` backend module signs users in with Google (OpenID Connect, scopes `openid profile email`). Every OAuth endpoint lives under `/api`, because the Worker only proxies `/api/*`:
+
+| What | URL |
+| --- | --- |
+| Start sign-in (the UI navigates here) | `/api/oauth2/authorization/google` |
+| Google redirects back to | `/api/login/oauth2/code/google`, then Spring redirects to `/ledger` |
+| Current user | `GET /api/me`: `{id, email, name, pictureUrl}`, or 401 JSON when signed out |
+| Sign out | `POST /api/logout` with the `X-XSRF-TOKEN` header, answers 204 |
+
+Everything else under `/api/**` requires a session; `/actuator/health/**` is public. The session lives in Postgres (`identity.spring_session`, created by Flyway) and the cookie is `HttpOnly`, `SameSite=Lax` and, in `prod`, `Secure`. Sessions last 14 days of inactivity. CSRF uses Spring Security's SPA mode: the `XSRF-TOKEN` cookie is readable by the page, and every unsafe request must echo it in `X-XSRF-TOKEN`.
+
+The redirect URI is built from the forwarded host (`server.forward-headers-strategy: framework`): the Worker sets `X-Forwarded-Host` and `X-Forwarded-Proto`, nginx does the same in the full compose stack, and Vite's dev proxy (`apps/web/vite.config.ts`) sets them too, because on its own it rewrites `Host` to the backend's, so locally Spring builds `http://localhost:5173/api/login/oauth2/code/google`.
+
+**Expired sessions are never cleaned up.** Spring Session JDBC normally runs a cleanup job every minute, which would hit Postgres forever and keep Neon awake, so `spring.session.jdbc.cleanup-cron` is `"-"` (disabled). Expired rows pile up in `identity.spring_session` but are ignored on read, so correctness is unaffected; at a handful of users the table stays tiny. If it ever matters, delete by hand: `DELETE FROM identity.spring_session WHERE expiry_time < (extract(epoch FROM now()) * 1000)::bigint;`. Never turn the cron back on and never add another timer that touches the database.
+
+### Create the Google OAuth client
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → pick or create a project → APIs & Services → OAuth consent screen (Google Auth Platform) → fill in the app name and your email.
+2. Credentials → Create credentials → OAuth client ID → type **Web application**. Add both authorized redirect URIs:
+   - `https://my-superapp-web.nguyenphuc102005.workers.dev/api/login/oauth2/code/google`
+   - `http://localhost:5173/api/login/oauth2/code/google`
+3. Copy the client ID and secret. Keep the secret out of git and chat.
+4. While the consent screen is in **Testing**, only the test users you list can sign in. Publish it (In production) for anyone else; the scopes used here are the basic ones, but check Google's own pages for whether your project needs verification.
+
+### Local setup
+
+```powershell
+Copy-Item .env.example .env      # then put the real values in .env (gitignored)
+```
+
+`./mvnw spring-boot:run` reads `../.env` through `spring.config.import`; environment variables with the same names win. Open the app at `http://localhost:5173` (the Vite proxy), not `:8080`, so the redirect URI matches the one registered with Google. If something else holds port 8080, start the backend with `$env:PORT = "8081"` and the shell with `$env:API_PROXY_TARGET = "http://localhost:8081"`. In the full compose stack the backend loads `.env` through `env_file`; the web container is on `http://localhost:8088`, so register `http://localhost:8088/api/login/oauth2/code/google` too if you want to sign in there. For minikube, fill `google-client-id` and `google-client-secret` in `secrets.env`.
+
+Tests and CI need no credentials: without `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` the registration uses the placeholder `not-configured`. The `prod` profile has no default and fails at startup if either is missing.
 
 ## Containers
 
@@ -126,6 +164,8 @@ The browser only ever talks to the Worker, so `/api` is same-origin and the back
 2. **Render** (backend). New → Blueprint → pick this repo; it reads `render.yaml`. Render asks for the three `sync: false` variables:
    - `SPRING_DATASOURCE_URL`: the JDBC URL from step 1
    - `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`: from Neon
+   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: from the OAuth client in [Google login](#google-login)
+
    The first start runs Flyway against Neon. The service is `my-superapp-backend`; note its URL (`https://<name>.onrender.com`; Render appends a suffix if the name is taken).
 3. **Cloudflare Workers Builds** (web). Workers & Pages → Create → Import a repository → this repo, then:
    - Project/Worker name: `my-superapp-web` (must equal `name` in `apps/web/wrangler.jsonc`)
@@ -143,10 +183,11 @@ The browser only ever talks to the Worker, so `/api` is same-origin and the back
 | --- | --- | --- |
 | Render | `SPRING_PROFILES_ACTIVE` | `prod` (set by the Blueprint) |
 | Render | `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | Neon direct host, see above |
+| Render | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth client; `prod` refuses to start without them |
 | Render | `PORT` | set by Render (10000); `server.port` reads it |
 | Worker | `API_ORIGIN` | plain var in `wrangler.jsonc`, not a secret |
 
-The `prod` profile (`application-prod.yaml`) caps Hikari at 5 connections with `minimum-idle: 0`, a 60 s idle timeout and a 240 s max lifetime, so idle connections do not keep Neon awake or break across its suspend. The profile also sets `spring.main.lazy-initialization`, which cut startup in a 512 MB / 0.1 CPU container from about 185 s to about 155 s; the image's JVM flags (`MaxRAMPercentage=60`, SerialGC, `TieredStopAtLevel=1`, `-Xss512k`) keep it near 215 MiB. Expect a cold start of roughly 2.5 minutes on Render's free CPU, and the first request after it is fast. Render checks `/actuator/health/readiness`, which does not include the database.
+The `prod` profile (`application-prod.yaml`) caps Hikari at 5 connections with `minimum-idle: 0`, a 60 s idle timeout and a 240 s max lifetime, so idle connections do not keep Neon awake or break across its suspend. The profile also sets `spring.main.lazy-initialization`, which cut startup in a 512 MB / 0.1 CPU container from about 185 s to about 155 s; the image's JVM flags (`MaxRAMPercentage=60`, SerialGC, `TieredStopAtLevel=1`, `-Xss512k`) keep it near 215 MiB. Expect a cold start of roughly 2.5 minutes on Render's free CPU, and the first request after it is fast. Render checks `/actuator/health/readiness`, which does not include the database. The session cookie is `Secure` in `prod`, and the backend sees the public host through the Worker's `X-Forwarded-*` headers.
 
 ### Keep-warm cron
 
