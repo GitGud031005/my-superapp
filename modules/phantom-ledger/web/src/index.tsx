@@ -2,6 +2,7 @@ import '@superapp/p5r-ds/styles.css';
 import { Banner, Button, Panel } from '@superapp/p5r-ds';
 import { useEffect, useState } from 'react';
 import { fetchMe, signOut, startGoogleSignIn, type Me } from './auth';
+import { Ledger } from './Ledger';
 import './module.css';
 
 type Session = { status: 'loading' } | { status: 'error' } | { status: 'signed-out' } | { status: 'signed-in'; me: Me };
@@ -89,16 +90,7 @@ export default function PhantomLedgerModule() {
                 Couldn't sign you out. Try again.
               </p>
             )}
-            <Panel title="Targets">
-              <div className="phantom-ledger__stack">
-                <p>Nobody owes you anything yet. Debts and badminton invites will show up here.</p>
-                <div>
-                  <Button variant="primary" disabled>
-                    Add a debt
-                  </Button>
-                </div>
-              </div>
-            </Panel>
+            <Ledger email={session.me.email} />
           </>
         )}
       </div>

@@ -51,6 +51,12 @@ spec:
                   name: backend-db
                   key: google-client-secret
                   optional: true
+            - name: LEDGER_ADMIN_EMAILS
+              valueFrom:
+                secretKeyRef:
+                  name: backend-db
+                  key: ledger-admin-emails
+                  optional: true
           resources:
             requests:
               cpu: 100m

@@ -1,6 +1,6 @@
 # my-superapp
 
-Personal superapp: a neutral shell that hosts feature modules. The first module is `phantom-ledger` (provisional name): collecting money friends owe and sending badminton invites.
+Personal superapp: a neutral shell that hosts feature modules. The first module is `phantom-ledger` (provisional name): a general debt ledger (one creditor, the admin; friends owe money for group expenses such as badminton and for personal charges). Badminton invites are not built yet.
 
 ## Layout
 
@@ -56,6 +56,17 @@ Backend module `com.superapp.identity` owns sign-in: `app_user`, the Spring Sess
 - CSRF is `csrf.spa()`: cookie `XSRF-TOKEN`, header `X-XSRF-TOKEN`. New unsafe endpoints need no extra work; the UI helper is `modules/phantom-ledger/web/src/auth.ts`.
 - Credentials are `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: gitignored `.env` locally (`.env.example` is committed), Render dashboard in prod (`render.yaml`, `sync: false`), `secrets.env` on minikube. Tests and CI use the `not-configured` placeholder; `prod` has no default. Never commit real values.
 - Other modules that need the current user must go through an API exposed from `identity`, not its tables.
+
+## Ledger (debts)
+
+Backend module `com.superapp.ledger` (Flyway `V3__create_ledger.sql`, schema `ledger`): `member` (one `name`, unique ignoring case after NFC normalisation, plus an optional unique `email`), `expense`, `expense_share`, `payment`. There is no nickname column: spreadsheet names exist only during an import. UI in `modules/phantom-ledger/web/src` (`Ledger.tsx` holds the `Tabs`; no router).
+
+- **Roles.** One creditor: the admin. Admins are the verified Google emails in `LEDGER_ADMIN_EMAILS` (comma-separated, case-insensitive; `application.yaml` maps it to `ledger.admin-emails`). `LedgerAccess` registers an interceptor that answers 403 on every `/api/ledger/admin/**` path for anyone else, so a new admin endpoint is protected just by living under that prefix. Never commit the real email: `.env`, Render dashboard (`render.yaml`, `sync: false`), `secrets.env` on minikube (`ledger-admin-emails`); compose passes it through `env_file: ../.env`.
+- **Linking.** A signed-in user is linked to the member whose `email` equals their Google email, only if Google says `email_verified`. The current user comes from the public `com.superapp.identity.CurrentUser` (built from the OAuth2 principal), never from identity's tables.
+- **Friends see only their own data.** `GET /api/ledger/me` takes no id, returns the caller's lines without ids, and for group lines only `shares` and `totalShares` (participants plus the owner's shares). Never add other members' names, ids or amounts to it.
+- **Money.** Whole đồng as `bigint`, never floating point. The balance (sum of share_amount x shares minus payments) is always computed, never stored. An expense is stored once with its `expense_share` rows, so editing it changes every participant at once. Group by total: `share_amount = ceil(total / (sum of shares + owner_shares))` rounded up to the next 1,000đ; owner shares only split the total and create no debt. `LedgerService.shareFromTotal` and `money.ts` `shareFromTotal` must stay identical, as must `Amounts.java` and `money.ts` `parseAmount` (both are tested with the same cases).
+- **Import.** The spreadsheet is parsed in the backend (`Csv`, `SpreadsheetParser`, every name normalised to NFC). The dry run without a mapping returns the distinct names with counts; the admin then maps each name (`MappingEntry`: `NEW` with a typed member name, `MERGE` into another `NEW` name, or `IGNORE`) and dry-runs again to see the resulting balances. `confirm` re-uploads the same file with the same mapping (a JSON multipart part named `mapping`), validates that every detected name is mapped, writes in one transaction and refuses if any expense or payment exists. Merged names add their shares; ignored names drop their shares and amounts and are listed. The mapping is never persisted and spreadsheet names are never stored; never hard-code names or a mapping anywhere. Columns F/G (bank/momo numbers) are never read. The repo is public: the user's spreadsheet, real names, amounts, emails and bank numbers must never be committed or logged; tests use fake names.
+- **Tests.** Ledger integration tests extend `LedgerTestSupport`. MockMvc's `csrf().asHeader()` does not work with `csrf.spa()`; the helper fetches the `XSRF-TOKEN` cookie first and sends it as cookie and header.
 
 ## Persona 5 Royal rule
 

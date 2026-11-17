@@ -7,7 +7,7 @@ export interface Me {
 
 const CSRF_COOKIE = 'XSRF-TOKEN';
 
-function csrfToken(): string {
+export function csrfToken(): string {
   const entry = document.cookie.split('; ').find((cookie) => cookie.startsWith(`${CSRF_COOKIE}=`));
   return entry ? decodeURIComponent(entry.slice(CSRF_COOKIE.length + 1)) : '';
 }

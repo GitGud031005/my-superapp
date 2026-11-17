@@ -4,7 +4,7 @@
 
 A personal superapp: a neutral shell that hosts several feature modules. Each module owns its own UI and its own slice of the backend.
 
-The first module, `phantom-ledger` (working name, not final), collects money friends owe and sends badminton invites. It is the only part of the app that uses the Persona 5 Royal design system.
+The first module, `phantom-ledger` (working name, not final), is a general debt ledger: friends owe the admin money for group expenses (badminton is just one kind) and for personal charges. It is the only part of the app that uses the Persona 5 Royal design system.
 
 ## Layout
 
@@ -78,9 +78,52 @@ The redirect URI is built from the forwarded host (`server.forward-headers-strat
 Copy-Item .env.example .env      # then put the real values in .env (gitignored)
 ```
 
-`./mvnw spring-boot:run` reads `../.env` through `spring.config.import`; environment variables with the same names win. Open the app at `http://localhost:5173` (the Vite proxy), not `:8080`, so the redirect URI matches the one registered with Google. If something else holds port 8080, start the backend with `$env:PORT = "8081"` and the shell with `$env:API_PROXY_TARGET = "http://localhost:8081"`. In the full compose stack the backend loads `.env` through `env_file`; the web container is on `http://localhost:8088`, so register `http://localhost:8088/api/login/oauth2/code/google` too if you want to sign in there. For minikube, fill `google-client-id` and `google-client-secret` in `secrets.env`.
+`./mvnw spring-boot:run` reads `../.env` through `spring.config.import`; environment variables with the same names win. Open the app at `http://localhost:5173` (the Vite proxy), not `:8080`, so the redirect URI matches the one registered with Google. If something else holds port 8080, start the backend with `$env:PORT = "8081"` and the shell with `$env:API_PROXY_TARGET = "http://localhost:8081"`. In the full compose stack the backend loads `.env` through `env_file`; the web container is on `http://localhost:8088`, so register `http://localhost:8088/api/login/oauth2/code/google` too if you want to sign in there. For minikube, fill `google-client-id` and `google-client-secret` in `secrets.env`. Put your own Google email in `LEDGER_ADMIN_EMAILS` in `.env` too; without it nobody can open the admin tabs (see [Debt ledger](#debt-ledger)).
 
 Tests and CI need no credentials: without `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` the registration uses the placeholder `not-configured`. The `prod` profile has no default and fails at startup if either is missing.
+
+## Debt ledger
+
+One creditor, the **admin**; everyone else is a **member** (a name plus an optional email). Balances are never stored: they are always computed from expenses and payments, in whole đồng.
+
+| Who | What they get |
+| --- | --- |
+| Admin | `Members`, `Add expense`, `Expenses` and `Import` tabs; the API under `/api/ledger/admin/**` |
+| Member whose Google email matches | `My ledger`: their balance and their own lines only. They never see other members, only the total share count of a group expense |
+| Any other signed-in user | "No ledger is linked to this account" |
+
+Admins are the Google emails in `LEDGER_ADMIN_EMAILS` (comma-separated, case-insensitive). A member is linked to a signed-in user when their `email` equals the Google email and Google reports it as verified. Both checks happen on the server.
+
+```powershell
+# .env (gitignored): your own address, never committed
+LEDGER_ADMIN_EMAILS=you@example.com
+```
+
+Where the variable lives: `.env` locally (the backend and the compose `backend` service both read it), the Render dashboard (`render.yaml` declares it with `sync: false`) and `ledger-admin-emails` in the minikube `secrets.env`. Empty means nobody is admin.
+
+**Expenses.** A *personal* expense is one member times one share. A *group* expense has a price per share and participants with their shares (a repeated name in the spreadsheet is more shares); the admin's own shares split the cost but create no debt. Entering a total instead gives `share = ceil(total / all shares)` rounded up to the next 1,000đ, and the form shows the difference before saving. Editing an expense changes every participant's line at once. Amount fields take `56k`, `56000` or `56.000`.
+
+**API** (all authenticated, CSRF as for the rest of `/api`):
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/ledger/me` | `{admin, member: {name, balance, history[]} or null}`, newest line first, each with its running balance |
+| `GET/POST /api/ledger/admin/members`, `PUT/DELETE .../members/{id}`, `GET .../members/{id}/history` | members with balances (delete only when they have no entries) |
+| `GET/POST /api/ledger/admin/expenses`, `PUT/DELETE .../expenses/{id}` | expenses, newest first (`limit`, `offset`) |
+| `POST /api/ledger/admin/payments`, `PUT/DELETE .../payments/{id}` | payments |
+| `POST /api/ledger/admin/import/dry-run` and `.../import/confirm` | multipart `file`; see below |
+
+### Import the spreadsheet
+
+In Excel use File, Save As, **CSV UTF-8 (Comma delimited)**, then open the ledger as admin, go to **Import** and pick the file. The backend reads column B (date such as `t3 9/1/24`), C (price per person such as `23k`), D (participants, a repeated name is another share) and E (free-form `name expr name expr`, e.g. `chi 30k+45k-20k binh -270k`); every other column, including bank and momo numbers, is ignored.
+
+- Dated rows with C and D become group expenses with the note "Badminton". D lists the people who have not paid yet, so a dated row with a price and no names (everyone paid) creates nothing and is not reported.
+- Every positive term in E becomes a personal expense ("Other charge (from Excel)"), every negative term a payment ("Deducted (from Excel)"). A row with only E takes the date of the nearest dated row above.
+- **Check file** is a dry run without a mapping: it lists every distinct name found in the sheet with how often it appears, the counts, and the rows it could not read, with row numbers. Nothing is written.
+- **Map the names.** For each name choose *A member* (type the member's name; a name that matches an existing member reuses it), *The same person as another name* (its shares and payments are added to that member; two names in one cell add up) or *Not a person, ignore* (its shares and amounts are dropped and listed). Every name needs a choice. **Preview balances** runs the dry run again with the mapping and shows each resulting member's balance, so you can check it against reality.
+- **Import everything** re-reads the same file with the same mapping, creates the missing members (no email) and writes everything in one transaction. It refuses if the ledger already has any expense or payment, so nothing is duplicated. The mapping is never stored, and spreadsheet names are not kept anywhere.
+
+The spreadsheet and anything derived from it must never be committed: this repository is public.
 
 ## Containers
 
@@ -165,6 +208,7 @@ The browser only ever talks to the Worker, so `/api` is same-origin and the back
    - `SPRING_DATASOURCE_URL`: the JDBC URL from step 1
    - `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`: from Neon
    - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: from the OAuth client in [Google login](#google-login)
+   - `LEDGER_ADMIN_EMAILS`: your own Google email, see [Debt ledger](#debt-ledger)
 
    The first start runs Flyway against Neon. The service is `my-superapp-backend`; note its URL (`https://<name>.onrender.com`; Render appends a suffix if the name is taken).
 3. **Cloudflare Workers Builds** (web). Workers & Pages → Create → Import a repository → this repo, then:
@@ -184,6 +228,7 @@ The browser only ever talks to the Worker, so `/api` is same-origin and the back
 | Render | `SPRING_PROFILES_ACTIVE` | `prod` (set by the Blueprint) |
 | Render | `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | Neon direct host, see above |
 | Render | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth client; `prod` refuses to start without them |
+| Render | `LEDGER_ADMIN_EMAILS` | comma-separated admin emails; optional, empty means nobody is admin |
 | Render | `PORT` | set by Render (10000); `server.port` reads it |
 | Worker | `API_ORIGIN` | plain var in `wrangler.jsonc`, not a secret |
 

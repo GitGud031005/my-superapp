@@ -35,6 +35,9 @@ spring:
       initialize-schema: never
       cleanup-cron: "-"
 
+ledger:
+  admin-emails: ${LEDGER_ADMIN_EMAILS:}
+
 management:
   endpoint:
     health:
