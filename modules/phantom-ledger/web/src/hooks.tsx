@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
 
-export type Load<T> = { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; data: T };
+export type Load<T> = { status: 'loading' } | { status: 'error'; error: unknown } | { status: 'ready'; data: T };
 
-export function useLoad<T>(loader: () => Promise<T>): { load: Load<T>; reload: () => void; refresh: () => void } {
+export function useLoad<T>(loader: () => Promise<T>): { load: Load<T>; stale: boolean; reload: () => void; refresh: () => void } {
   const [load, setLoad] = useState<Load<T>>({ status: 'loading' });
+  const [stale, setStale] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let ignore = false;
     loader()
       .then((data) => {
-        if (!ignore) setLoad({ status: 'ready', data });
+        if (ignore) return;
+        setLoad({ status: 'ready', data });
+        setStale(false);
       })
       .catch((error: unknown) => {
         if (ignore) return;
-        const message = error instanceof Error ? error.message : 'Something went wrong.';
-        setLoad((current) => (current.status === 'ready' ? current : { status: 'error', message }));
+        setLoad((current) => (current.status === 'ready' ? current : { status: 'error', error }));
+        setStale(true);
       });
     return () => {
       ignore = true;
@@ -24,6 +27,7 @@ export function useLoad<T>(loader: () => Promise<T>): { load: Load<T>; reload: (
 
   return {
     load,
+    stale,
     reload: () => {
       setLoad({ status: 'loading' });
       setAttempt((count) => count + 1);

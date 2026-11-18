@@ -1,3 +1,5 @@
+import type { Lang } from './i18n';
+
 const VND = new Intl.NumberFormat('vi-VN');
 
 const ROUNDING = 1000;
@@ -27,8 +29,48 @@ export function todayIso(): string {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-export function dateParts(iso: string): { year: number; month: number; day: number; weekday: string } {
+const LOCALE = { vi: 'vi-VN', en: 'en-GB' } as const;
+
+function utcDate(iso: string): Date {
   const [year, month, day] = iso.split('-').map(Number);
-  const weekday = new Date(Date.UTC(year, month - 1, day)).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+export function formatDate(iso: string, lang: Lang): string {
+  return utcDate(iso).toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
+export function dateParts(iso: string, lang: Lang = 'en'): { year: number; month: number; day: number; weekday: string } {
+  const [year, month, day] = iso.split('-').map(Number);
+  const weekday = utcDate(iso).toLocaleDateString(LOCALE[lang], { weekday: 'short', timeZone: 'UTC' });
   return { year, month, day, weekday };
+}
+
+export type Pricing = 'share' | 'total';
+
+export interface SplitPreview {
+  totalShares: number;
+  sharePrice: number;
+  total: number;
+  over: number;
+  perPerson: { id: string; shares: number; amount: number }[];
+}
+
+export function splitPreview(
+  people: { id: string; shares: number }[],
+  ownerShares: number,
+  pricing: Pricing,
+  amount: number | null,
+): SplitPreview | null {
+  const totalShares = people.reduce((sum, person) => sum + person.shares, 0) + ownerShares;
+  if (amount === null || amount <= 0 || totalShares === 0) return null;
+  const sharePrice = pricing === 'total' ? shareFromTotal(amount, totalShares) : amount;
+  const total = sharePrice * totalShares;
+  return {
+    totalShares,
+    sharePrice,
+    total,
+    over: pricing === 'total' ? total - amount : 0,
+    perPerson: people.map((person) => ({ ...person, amount: sharePrice * person.shares })),
+  };
 }

@@ -1,7 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { LANG_STORAGE_KEY } from './I18nProvider';
 import PhantomLedgerModule from './index';
 import { respond, stubApi } from './testApi';
+import { stubResizeObserver } from './testUtils';
 
 const startGoogleSignIn = vi.hoisted(() => vi.fn());
 
@@ -14,11 +16,19 @@ const me = { id: '7d1c', email: 'ada@example.com', name: 'Ada Lovelace', picture
 
 const unlinked = respond(200, { admin: false, member: null });
 
+beforeEach(stubResizeObserver);
+
 afterEach(() => {
   vi.unstubAllGlobals();
+  localStorage.clear();
   startGoogleSignIn.mockReset();
   document.cookie = 'XSRF-TOKEN=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 });
+
+function renderModule() {
+  localStorage.setItem(LANG_STORAGE_KEY, 'en');
+  return render(<PhantomLedgerModule />);
+}
 
 describe('PhantomLedgerModule', () => {
   it('renders inside the p5r-scope wrapper', () => {
@@ -29,7 +39,7 @@ describe('PhantomLedgerModule', () => {
 
   it('shows the sign-in screen on 401 and starts the Google redirect', async () => {
     stubApi({ 'GET /api/me': respond(401, { error: 'unauthenticated' }) });
-    render(<PhantomLedgerModule />);
+    renderModule();
 
     fireEvent.click(await screen.findByRole('button', { name: 'Sign in with Google' }));
 
@@ -39,7 +49,7 @@ describe('PhantomLedgerModule', () => {
 
   it('shows the user name and a sign-out button when signed in', async () => {
     stubApi({ 'GET /api/me': respond(200, me), 'GET /api/ledger/me': unlinked });
-    render(<PhantomLedgerModule />);
+    renderModule();
 
     expect(await screen.findByText('Ada Lovelace')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
@@ -53,7 +63,7 @@ describe('PhantomLedgerModule', () => {
       'GET /api/ledger/me': unlinked,
       'POST /api/logout': respond(204),
     });
-    render(<PhantomLedgerModule />);
+    renderModule();
 
     fireEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
 
@@ -70,7 +80,7 @@ describe('PhantomLedgerModule', () => {
       'GET /api/me': () => (attempts++ === 0 ? respond(502) : respond(200, me)),
       'GET /api/ledger/me': unlinked,
     });
-    render(<PhantomLedgerModule />);
+    renderModule();
 
     fireEvent.click(await screen.findByRole('button', { name: 'Try again' }));
 

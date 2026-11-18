@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dateParts, formatMoney, parseAmount, shareFromTotal } from './money';
+import { dateParts, formatDate, formatMoney, parseAmount, shareFromTotal, splitPreview } from './money';
 
 describe('parseAmount', () => {
   it.each([
@@ -45,5 +45,51 @@ describe('formatMoney', () => {
 describe('dateParts', () => {
   it('reads an ISO date without shifting it by the time zone', () => {
     expect(dateParts('2024-01-09')).toEqual({ year: 2024, month: 1, day: 9, weekday: 'Tue' });
+  });
+
+  it('names the weekday in the chosen language', () => {
+    expect(dateParts('2024-01-09', 'vi').weekday).toBe('Th 3');
+  });
+});
+
+describe('splitPreview', () => {
+  const people = [
+    { id: 'a', shares: 2 },
+    { id: 'b', shares: 1 },
+  ];
+
+  it('prices every share the same and reports the rounding difference when starting from a total', () => {
+    expect(splitPreview(people, 1, 'total', 100000)).toEqual({
+      totalShares: 4,
+      sharePrice: 25000,
+      total: 100000,
+      over: 0,
+      perPerson: [
+        { id: 'a', shares: 2, amount: 50000 },
+        { id: 'b', shares: 1, amount: 25000 },
+      ],
+    });
+    expect(splitPreview(people, 0, 'total', 100000)).toMatchObject({ sharePrice: 34000, total: 102000, over: 2000 });
+  });
+
+  it('multiplies a per-share price by the shares and never reports a difference', () => {
+    expect(splitPreview(people, 1, 'share', 23000)).toMatchObject({ totalShares: 4, sharePrice: 23000, total: 92000, over: 0 });
+  });
+
+  it('has nothing to show without shares or a positive amount', () => {
+    expect(splitPreview([], 0, 'share', 23000)).toBeNull();
+    expect(splitPreview(people, 0, 'share', null)).toBeNull();
+    expect(splitPreview(people, 0, 'share', 0)).toBeNull();
+  });
+
+  it('agrees with shareFromTotal', () => {
+    expect(splitPreview([{ id: 'a', shares: 12 }], 0, 'total', 276000)?.sharePrice).toBe(shareFromTotal(276000, 12));
+  });
+});
+
+describe('formatDate', () => {
+  it('follows the chosen language without shifting the day', () => {
+    expect(formatDate('2024-01-09', 'en')).toBe('9 Jan 2024');
+    expect(formatDate('2024-01-09', 'vi')).toBe('9 thg 1, 2024');
   });
 });

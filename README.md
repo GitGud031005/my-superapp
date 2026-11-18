@@ -88,7 +88,7 @@ One creditor, the **admin**; everyone else is a **member** (a name plus an optio
 
 | Who | What they get |
 | --- | --- |
-| Admin | `Members`, `Add expense` and `Expenses` tabs; the API under `/api/ledger/admin/**` |
+| Admin | One screen: totals, a debt table (highest first) and buttons for group debt, personal debt, add member and all expenses, plus history and payments per row; the API under `/api/ledger/admin/**` |
 | Member whose Google email matches | `My ledger`: their balance and their own lines only. They never see other members, only the total share count of a group expense |
 | Any other signed-in user | "No ledger is linked to this account" |
 
