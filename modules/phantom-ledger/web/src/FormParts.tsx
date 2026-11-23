@@ -18,13 +18,13 @@ export function Stepper({
 }) {
   return (
     <div role="group" aria-label={label} className="phantom-ledger__stepper">
-      <Button variant="dark" size="sm" aria-label={fewer} disabled={value <= min} onClick={() => onChange(value - 1)}>
+      <Button variant="light" size="sm" aria-label={fewer} disabled={value <= min} onClick={() => onChange(value - 1)}>
         −
       </Button>
       <output aria-label={label} className="phantom-ledger__stepper-value">
         {value}
       </output>
-      <Button variant="dark" size="sm" aria-label={more} onClick={() => onChange(value + 1)}>
+      <Button variant="light" size="sm" aria-label={more} onClick={() => onChange(value + 1)}>
         +
       </Button>
     </div>
@@ -52,7 +52,7 @@ export function MemberPicker({
           const on = picked(member.id);
           return (
             <button key={member.id} type="button" className="phantom-ledger__toggle" aria-pressed={on} onClick={() => onToggle(member)}>
-              <Tag tone={on ? 'cyan' : 'black'}>
+              <Tag tone={on ? 'cyan' : 'white'}>
                 {on && <span aria-hidden="true">✓ </span>}
                 {member.name}
               </Tag>

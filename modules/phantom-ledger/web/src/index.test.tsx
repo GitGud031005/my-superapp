@@ -47,6 +47,13 @@ describe('PhantomLedgerModule', () => {
     expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument();
   });
 
+  it('links back to the shell from its own top bar', async () => {
+    stubApi({ 'GET /api/me': respond(401, { error: 'unauthenticated' }) });
+    renderModule();
+
+    expect(await screen.findByRole('link', { name: '← Superapp' })).toHaveAttribute('href', '/');
+  });
+
   it('shows the user name and a sign-out button when signed in', async () => {
     stubApi({ 'GET /api/me': respond(200, me), 'GET /api/ledger/me': unlinked });
     renderModule();

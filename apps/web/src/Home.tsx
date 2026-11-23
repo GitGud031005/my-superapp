@@ -1,12 +1,5 @@
 import { Link } from 'react-router';
-
-const modules = [
-  {
-    path: '/ledger',
-    name: 'Phantom Ledger',
-    description: 'Collect money friends owe and send badminton invites.',
-  },
-];
+import { modules } from './modules';
 
 export function Home() {
   return (

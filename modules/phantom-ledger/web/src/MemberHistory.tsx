@@ -61,7 +61,7 @@ export function MemberHistory({
             <Button variant="light" onClick={() => onRecordPayment(member)}>
               {t.table.recordPayment}
             </Button>
-            <Button variant="dark" onClick={() => onEditMember(member)}>
+            <Button variant="light" onClick={() => onEditMember(member)}>
               {t.history.editMember}
             </Button>
           </div>
@@ -74,10 +74,10 @@ export function MemberHistory({
               actions={(line) =>
                 line.kind === 'PAYMENT' && (
                   <div className="phantom-ledger__actions">
-                    <Button variant="dark" size="sm" onClick={() => onEditPayment(member, line)}>
+                    <Button variant="light" size="sm" onClick={() => onEditPayment(member, line)}>
                       {t.edit}
                     </Button>
-                    <Button variant="dark" size="sm" onClick={() => setRemoving(line)}>
+                    <Button variant="light" size="sm" onClick={() => setRemoving(line)}>
                       {t.delete}
                     </Button>
                   </div>
@@ -87,6 +87,7 @@ export function MemberHistory({
           )}
           <Dialog
             open={removing !== null}
+            closeLabel={t.close}
             title={t.history.deletePaymentTitle}
             onClose={() => setRemoving(null)}
             actions={

@@ -1,5 +1,5 @@
 import { AwardToast, Button, Dialog, Panel } from '@superapp/p5r-ds';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { listMembers, type Expense, type Line, type Member, type Mine } from './api';
 import { DebtTable, type DebtRow } from './DebtTable';
 import { ExpensesList } from './ExpensesList';
@@ -41,9 +41,9 @@ function modalKey(modal: Modal | null): string | null {
   }
 }
 
-function Stat({ label, children }: { label: string; children: ReactNode }) {
+function Stat({ label, index, children }: { label: string; index: number; children: ReactNode }) {
   return (
-    <div className="phantom-ledger__stat">
+    <div className="phantom-ledger__stat" style={{ '--i': index } as CSSProperties}>
       <dt>{label}</dt>
       <dd>{children}</dd>
     </div>
@@ -190,41 +190,51 @@ export function AdminLedger({ mine }: { mine: Mine | null }) {
             <>
               <section aria-label={t.stats.label}>
                 <dl className="phantom-ledger__stats" data-count={stats.ahead > 0 ? 4 : 3}>
-                  <Stat label={t.stats.totalOwed}>
+                  <Stat label={t.stats.totalOwed} index={0}>
                     <span className="phantom-ledger__stat-value phantom-ledger__stat-value--money">{formatMoney(stats.totalOwed)}</span>
                   </Stat>
-                  <Stat label={t.stats.owing}>
+                  <Stat label={t.stats.owing} index={1}>
                     <span className="phantom-ledger__stat-value">{stats.owing}</span> {t.stats.people(stats.owing)}
                   </Stat>
-                  <Stat label={t.stats.settled}>
+                  <Stat label={t.stats.settled} index={2}>
                     <span className="phantom-ledger__stat-value">{stats.settled}</span> {t.stats.people(stats.settled)}
                   </Stat>
                   {stats.ahead > 0 && (
-                    <Stat label={t.stats.ahead}>
+                    <Stat label={t.stats.ahead} index={3}>
                       <span className="phantom-ledger__stat-value">{stats.ahead}</span> {t.stats.people(stats.ahead)}
                     </Stat>
                   )}
                 </dl>
               </section>
 
-              <div className="phantom-ledger__actions phantom-ledger__action-bar" role="group" aria-label={t.actions.label}>
-                <Button variant="primary" onClick={() => open({ kind: 'group' })}>
-                  {t.actions.groupDebt}
-                </Button>
-                <Button variant="light" onClick={() => open({ kind: 'personal' })}>
-                  {t.actions.personalDebt}
-                </Button>
-                <Button variant="light" onClick={() => open({ kind: 'member' })}>
-                  {t.actions.addMember}
-                </Button>
-                <Button variant="light" onClick={() => open({ kind: 'expenses' })}>
-                  {t.actions.allExpenses}
-                </Button>
-                {mine && (
-                  <Button variant="light" onClick={() => open({ kind: 'mine' })}>
-                    {t.friend.myLedger}
+              <div className="phantom-ledger__menu" role="group" aria-label={t.actions.label}>
+                <div className="phantom-ledger__entries">
+                  <div className="phantom-ledger__entry">
+                    <Button variant="primary" className="phantom-ledger__entry-button" onClick={() => open({ kind: 'group' })}>
+                      <span aria-hidden="true" className="phantom-ledger__arrow" />
+                      {t.actions.groupDebt}
+                    </Button>
+                  </div>
+                  <div className="phantom-ledger__entry">
+                    <Button variant="light" className="phantom-ledger__entry-button" onClick={() => open({ kind: 'personal' })}>
+                      <span aria-hidden="true" className="phantom-ledger__arrow" />
+                      {t.actions.personalDebt}
+                    </Button>
+                  </div>
+                </div>
+                <div className="phantom-ledger__secondary">
+                  <Button variant="light" size="sm" onClick={() => open({ kind: 'member' })}>
+                    {t.actions.addMember}
                   </Button>
-                )}
+                  <Button variant="light" size="sm" onClick={() => open({ kind: 'expenses' })}>
+                    {t.actions.allExpenses}
+                  </Button>
+                  {mine && (
+                    <Button variant="light" size="sm" onClick={() => open({ kind: 'mine' })}>
+                      {t.friend.myLedger}
+                    </Button>
+                  )}
+                </div>
               </div>
 
               <div role="status" className="p5r-sr-only">
@@ -238,7 +248,7 @@ export function AdminLedger({ mine }: { mine: Mine | null }) {
               {stale && (
                 <div role="alert" className="phantom-ledger__stale">
                   <p>{t.refreshFailed}</p>
-                  <Button variant="dark" size="sm" onClick={refresh}>
+                  <Button variant="light" size="sm" onClick={refresh}>
                     {t.tryAgain}
                   </Button>
                 </div>
@@ -262,10 +272,10 @@ export function AdminLedger({ mine }: { mine: Mine | null }) {
                       largest={largest}
                       renderActions={(member) => (
                         <>
-                          <Button variant="dark" size="sm" aria-label={t.table.historyOf(member.name)} onClick={() => open({ kind: 'history', memberId: member.id })}>
+                          <Button variant="light" size="sm" aria-label={t.table.historyOf(member.name)} onClick={() => open({ kind: 'history', memberId: member.id })}>
                             {t.table.history}
                           </Button>
-                          <Button variant="dark" size="sm" aria-label={t.table.recordPaymentFor(member.name)} onClick={() => open({ kind: 'payment', member })}>
+                          <Button variant="light" size="sm" aria-label={t.table.recordPaymentFor(member.name)} onClick={() => open({ kind: 'payment', member })}>
                             {t.table.recordPayment}
                           </Button>
                         </>
@@ -279,7 +289,7 @@ export function AdminLedger({ mine }: { mine: Mine | null }) {
         }}
       </Loaded>
 
-      <Dialog open={modal !== null} title={dialog?.title ?? ''} onClose={close} actions={dialog?.closeButton && <Button onClick={close}>{t.close}</Button>}>
+      <Dialog open={modal !== null} title={dialog?.title ?? ''} onClose={close} closeLabel={t.close} actions={dialog?.closeButton && <Button onClick={close}>{t.close}</Button>}>
         <div ref={body}>{dialog?.body}</div>
       </Dialog>
     </div>

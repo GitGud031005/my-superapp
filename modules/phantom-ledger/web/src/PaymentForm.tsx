@@ -64,7 +64,7 @@ export function PaymentForm({
         <Button type="submit" variant="primary" disabled={busy}>
           {t.payment.save}
         </Button>
-        <Button variant="dark" onClick={onCancel} disabled={busy}>
+        <Button variant="light" onClick={onCancel} disabled={busy}>
           {t.cancel}
         </Button>
       </div>

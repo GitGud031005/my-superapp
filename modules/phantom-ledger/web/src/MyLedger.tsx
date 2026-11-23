@@ -13,7 +13,7 @@ export function MyLedger({ mine }: { mine: Mine }) {
         <p className="phantom-ledger__balance-label">{label}</p>
         <p className="phantom-ledger__balance">{formatMoney(Math.abs(mine.balance))}</p>
       </Panel>
-      <Banner as="h2" tone="white">
+      <Banner as="h2" tone="black">
         {t.friend.history}
       </Banner>
       {mine.history.length === 0 ? <p>{t.friend.empty}</p> : <History lines={mine.history} />}

@@ -8,6 +8,7 @@ export const LANG_NAMES: Record<Lang, string> = { vi: 'Tiếng Việt', en: 'Eng
 
 export const en = {
   language: 'Language',
+  backToSuperapp: '← Superapp',
   loading: 'Loading…',
   couldntLoad: "Couldn't load",
   tryAgain: 'Try again',
@@ -69,6 +70,7 @@ export const en = {
   table: {
     caption: 'Who owes what, highest debt first',
     rank: 'Rank',
+    top: (rank: number) => `Top ${rank}`,
     name: 'Name',
     balance: 'Balance',
     share: 'Debt level',
@@ -197,6 +199,7 @@ export type Strings = typeof en;
 
 export const vi: Strings = {
   language: 'Ngôn ngữ',
+  backToSuperapp: '← Superapp',
   loading: 'Đang tải…',
   couldntLoad: 'Không tải được',
   tryAgain: 'Thử lại',
@@ -258,6 +261,7 @@ export const vi: Strings = {
   table: {
     caption: 'Ai đang nợ bao nhiêu, nợ nhiều nhất xếp trước',
     rank: 'Hạng',
+    top: (rank) => `Hạng ${rank}`,
     name: 'Tên',
     balance: 'Số dư',
     share: 'Mức nợ',

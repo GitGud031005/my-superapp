@@ -1,5 +1,5 @@
 import { StatBar, Tag } from '@superapp/p5r-ds';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { Member } from './api';
 import { useT } from './i18nContext';
 import { formatMoney } from './money';
@@ -62,13 +62,21 @@ export function DebtTable({
         </tr>
       </thead>
       <tbody role="rowgroup">
-        {rows.map(({ member, rank }) => {
+        {rows.map(({ member, rank }, index) => {
           const owing = member.balance > 0;
           const linked = member.email !== null;
           return (
-            <tr key={member.id} role="row" className="phantom-ledger__debt" data-owing={owing}>
+            <tr key={member.id} role="row" className="phantom-ledger__debt" data-owing={owing} style={{ '--i': Math.min(index, 8) } as CSSProperties}>
               <td role="cell" data-label={t.table.rank} className="phantom-ledger__col-rank">
-                {rank ?? '–'}
+                <span className="phantom-ledger__rank">
+                  {rank !== null && rank <= 3 && (
+                    <>
+                      <span aria-hidden="true" className="phantom-ledger__decor phantom-ledger__decor--star5 phantom-ledger__badge" />
+                      <span className="p5r-sr-only">{t.table.top(rank)}</span>
+                    </>
+                  )}
+                  <span aria-hidden={rank !== null && rank <= 3 ? 'true' : undefined}>{rank ?? '–'}</span>
+                </span>
               </td>
               <th scope="row" role="rowheader" className="phantom-ledger__col-name">
                 <span className="phantom-ledger__name">{member.name}</span>

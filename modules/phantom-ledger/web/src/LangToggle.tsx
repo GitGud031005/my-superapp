@@ -11,7 +11,7 @@ export function LangToggle() {
         <Button
           key={code}
           size="sm"
-          variant="dark"
+          variant="light"
           className="phantom-ledger__lang"
           lang={code}
           aria-label={`${code.toUpperCase()}: ${LANG_NAMES[code]}`}

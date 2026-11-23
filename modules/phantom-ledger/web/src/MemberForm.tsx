@@ -68,11 +68,11 @@ export function MemberForm({
           <Button type="submit" variant="primary" disabled={busy}>
             {t.member.save}
           </Button>
-          <Button variant="dark" onClick={onCancel} disabled={busy}>
+          <Button variant="light" onClick={onCancel} disabled={busy}>
             {t.cancel}
           </Button>
           {member && (
-            <Button variant="dark" onClick={() => setConfirmingDelete(true)} disabled={busy}>
+            <Button variant="light" onClick={() => setConfirmingDelete(true)} disabled={busy}>
               {t.member.delete}
             </Button>
           )}
@@ -80,6 +80,7 @@ export function MemberForm({
       </form>
       <Dialog
         open={confirmingDelete}
+        closeLabel={t.close}
         title={t.member.deleteTitle}
         onClose={() => setConfirmingDelete(false)}
         actions={

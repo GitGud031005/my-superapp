@@ -5,5 +5,7 @@ export interface DialogProps {
   onClose: () => void;
   /** Buttons rendered right-aligned in the footer */
   actions?: React.ReactNode;
+  /** Accessible name of the close button in the header corner. Default "Close"; pass the translated word */
+  closeLabel?: string;
   children: React.ReactNode;
 }

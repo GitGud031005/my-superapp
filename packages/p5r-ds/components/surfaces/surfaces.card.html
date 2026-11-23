@@ -24,7 +24,7 @@ function Demo(){
         <Panel tone="light" style={{width:200}}>Readable body copy sits on a light panel.</Panel>
       </div>
       <div><Button variant="primary" onClick={()=>setOpen(true)}>Open dialog</Button></div>
-      <Dialog open={open} title="Send the card?" onClose={()=>setOpen(false)}
+      <Dialog open={open} title="Send the card?" onClose={()=>setOpen(false)} closeLabel="Close"
         actions={<><Button onClick={()=>setOpen(false)}>Cancel</Button><Button variant="primary" onClick={()=>setOpen(false)}>Send the card</Button></>}>
         The target will receive it tomorrow.
       </Dialog>

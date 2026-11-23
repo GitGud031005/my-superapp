@@ -134,10 +134,10 @@ export function ExpensesList({ onEdit, onChanged }: { onEdit: (expense: Expense)
                   <Tag tone={expense.type === 'GROUP' ? 'red' : 'white'}>{expense.type === 'GROUP' ? t.expenses.group : t.expenses.personal}</Tag>
                 </div>
                 <div className="phantom-ledger__actions">
-                  <Button variant="dark" size="sm" aria-label={t.expenses.editAria(expense.note)} onClick={() => onEdit(expense)}>
+                  <Button variant="light" size="sm" aria-label={t.expenses.editAria(expense.note)} onClick={() => onEdit(expense)}>
                     {t.edit}
                   </Button>
-                  <Button variant="dark" size="sm" aria-label={t.expenses.deleteAria(expense.note)} onClick={() => setRemoving(expense)}>
+                  <Button variant="light" size="sm" aria-label={t.expenses.deleteAria(expense.note)} onClick={() => setRemoving(expense)}>
                     {t.delete}
                   </Button>
                 </div>
@@ -153,6 +153,7 @@ export function ExpensesList({ onEdit, onChanged }: { onEdit: (expense: Expense)
       )}
       <Dialog
         open={removing !== null}
+        closeLabel={t.close}
         title={t.expenses.deleteTitle}
         onClose={() => setRemoving(null)}
         actions={

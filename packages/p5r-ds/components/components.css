@@ -135,9 +135,19 @@ textarea.p5r-field__control{ resize:vertical; min-height:96px; }
 .p5r-dialog{ padding:0; border:var(--outline-w) solid var(--stroke-on-dark); background:var(--surface-panel-dark); color:var(--text-on-dark); max-width:min(92vw, 520px); box-shadow:var(--shadow-hard-red); }
 .p5r-dialog::backdrop{ background:var(--surface-overlay); }
 .p5r-dialog[open]{ animation:p5r-dialog-in var(--duration-slow) var(--ease-slam) both; }
-.p5r-dialog__head{ margin:0; padding:var(--space-4) var(--space-5); background:var(--accent-primary); color:var(--text-on-red); font:400 var(--text-heading-md)/1 var(--font-display); text-transform:uppercase; letter-spacing:var(--tracking-display); }
+.p5r-dialog__head{ margin:0; padding:var(--space-4) calc(var(--space-5) + 44px + var(--space-3)) var(--space-4) var(--space-5); background:var(--accent-primary); color:var(--text-on-red); font:400 var(--text-heading-md)/1 var(--font-display); text-transform:uppercase; letter-spacing:var(--tracking-display); }
 .p5r-dialog__body{ padding:var(--space-5); line-height:var(--leading-normal); }
 .p5r-dialog__actions{ display:flex; flex-wrap:wrap; gap:var(--space-4); justify-content:flex-end; padding:0 var(--space-5) var(--space-5); }
+.p5r-dialog__close{
+  position:absolute; inset-block-start:var(--space-2); inset-inline-end:var(--space-3); inline-size:44px; block-size:40px;
+  display:grid; place-items:center; padding:0; border:0; border-radius:var(--radius-none); cursor:pointer;
+  background:var(--surface-panel-dark); color:var(--text-on-dark); transform:skewX(var(--skew-menu));
+  transition:transform var(--duration-fast) var(--ease-snap), background-color var(--duration-fast) var(--ease-snap), color var(--duration-fast) var(--ease-snap);
+}
+.p5r-dialog__close svg{ inline-size:20px; block-size:20px; fill:none; stroke:currentColor; stroke-width:3.5; transform:skewX(calc(var(--skew-menu) * -1)); }
+.p5r-dialog__close:focus-visible{ outline:3px solid var(--stroke-on-dark); outline-offset:3px; }
+.p5r-dialog__close:active{ transform:skewX(var(--skew-menu)) scale(.92); }
+@media (hover: hover){ .p5r-dialog__close:hover{ background:var(--surface-panel-light); color:var(--text-on-light); } }
 @keyframes p5r-dialog-in{ from{ opacity:0; transform:translateY(16px) rotate(-1.5deg); } to{ opacity:1; } }
 
 /* ---------- AwardToast ---------- */
@@ -217,5 +227,5 @@ button.p5r-card:focus-visible{ outline:3px solid var(--focus-ring); outline-offs
 
 @media (prefers-reduced-motion: reduce){
   .p5r-tile, .p5r-menu__item, .p5r-toast, .p5r-dialog[open]{ animation:none; }
-  .p5r-btn, .p5r-tab, .p5r-menu__item, .p5r-stat__fill, .p5r-tarot__inner, .p5r-card{ transition:none; }
+  .p5r-btn, .p5r-tab, .p5r-menu__item, .p5r-stat__fill, .p5r-tarot__inner, .p5r-card, .p5r-dialog__close{ transition:none; }
 }

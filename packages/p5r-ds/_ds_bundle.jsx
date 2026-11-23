@@ -325,7 +325,7 @@ function DateSticker({ month, day, weekday, period }) {
 
 /* components/surfaces/Dialog.jsx */
 
-function Dialog({ open, title, onClose, actions, children }) {
+function Dialog({ open, title, onClose, actions, closeLabel = 'Close', children }) {
   const ref = useRef(null);
   const titleId = useId();
 
@@ -347,6 +347,10 @@ function Dialog({ open, title, onClose, actions, children }) {
       <h2 id={titleId} className="p5r-dialog__head">{title}</h2>
       <div className="p5r-dialog__body">{children}</div>
       {actions && <div className="p5r-dialog__actions">{actions}</div>}
+      {/* Last in the DOM so the first control in the body gets the initial focus; CSS puts it in the header corner */}
+      <button type="button" className="p5r-dialog__close" aria-label={closeLabel} onClick={onClose}>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5L19 19M19 5L5 19" /></svg>
+      </button>
     </dialog>
   );
 }

@@ -138,8 +138,8 @@ describe('admin debt table', () => {
     await screen.findByRole('table');
     expect(rowNames()).toEqual(['Cara', 'Anna', 'Eli', 'Dan', 'Fay', 'Ben']);
     const rows = screen.getAllByRole('row').slice(1);
-    expect(within(rows[0]).getByRole('cell', { name: '1' })).toBeInTheDocument();
-    expect(within(rows[2]).getByRole('cell', { name: '3' })).toBeInTheDocument();
+    expect(within(rows[0]).getByRole('cell', { name: 'Top 1' })).toBeInTheDocument();
+    expect(within(rows[2]).getByRole('cell', { name: 'Top 3' })).toBeInTheDocument();
     expect(within(rows[3]).getByRole('cell', { name: '–' })).toBeInTheDocument();
     expect(within(rows[0]).getByText('120.000đ')).toBeInTheDocument();
     expect(within(rows[5]).getByText('-5.000đ')).toBeInTheDocument();
@@ -406,6 +406,26 @@ describe('admin dialogs', () => {
       ownerShares: 0,
       participants: [{ memberId: 'm-ben', shares: 1 }],
     });
+  });
+
+  it('closes a dialog with its close button', async () => {
+    stubApi(adminRoutes());
+    renderIn(<Ledger email="boss@example.com" />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Add member' }));
+    expect(document.querySelector('dialog[open]')).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    await waitFor(() => expect(document.querySelector('dialog[open]')).toBeNull());
+  });
+
+  it('labels the close button in the chosen language', async () => {
+    stubApi(adminRoutes());
+    renderIn(<Ledger email="boss@example.com" />, 'vi');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Thêm thành viên' }));
+
+    expect(screen.getByRole('button', { name: 'Đóng' })).toBeInTheDocument();
   });
 
   it('adds a member', async () => {

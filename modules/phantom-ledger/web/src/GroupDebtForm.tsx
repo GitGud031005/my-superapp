@@ -177,7 +177,7 @@ export function GroupDebtForm({
         <Button type="submit" variant="primary" disabled={busy}>
           {expense ? t.group.saveChanges : t.group.save}
         </Button>
-        <Button variant="dark" onClick={onCancel} disabled={busy}>
+        <Button variant="light" onClick={onCancel} disabled={busy}>
           {t.cancel}
         </Button>
       </div>

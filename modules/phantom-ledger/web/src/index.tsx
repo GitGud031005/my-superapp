@@ -1,10 +1,10 @@
 import '@superapp/p5r-ds/styles.css';
-import { Button, Panel, RansomTitle } from '@superapp/p5r-ds';
+import { Button, Panel } from '@superapp/p5r-ds';
 import { useEffect, useState } from 'react';
 import { fetchMe, signOut, startGoogleSignIn, type Me } from './auth';
+import { Backdrop, Hero, TopBar } from './Chrome';
 import { I18nProvider } from './I18nProvider';
 import { useT } from './i18nContext';
-import { LangToggle } from './LangToggle';
 import { Ledger } from './Ledger';
 import './module.css';
 
@@ -48,32 +48,10 @@ function Module() {
 
   return (
     <>
-      <div className="phantom-ledger__backdrop" aria-hidden="true">
-        <div className="phantom-ledger__bullseye" />
-      </div>
+      <Backdrop />
+      <TopBar name={session.status === 'signed-in' ? session.me.name : undefined} onSignOut={() => void handleSignOut()} />
       <div className="phantom-ledger__page">
-        <header className="phantom-ledger__header">
-          <div className="phantom-ledger__account">
-            {session.status === 'signed-in' ? (
-              <p>
-                {t.session.signedInAs} <strong>{session.me.name}</strong>
-              </p>
-            ) : (
-              <span />
-            )}
-            <div className="phantom-ledger__actions">
-              <LangToggle />
-              {session.status === 'signed-in' && (
-                <Button variant="light" size="sm" onClick={() => void handleSignOut()}>
-                  {t.session.signOut}
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="phantom-ledger__title">
-            <RansomTitle as="h1" text="Phantom Ledger" skin="logo" fit maxSize={72} />
-          </div>
-        </header>
+        <Hero />
         {session.status === 'loading' && (
           <p role="status" className="phantom-ledger__status">
             {t.session.checking}
