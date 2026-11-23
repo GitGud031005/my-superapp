@@ -1,12 +1,20 @@
 <!-- @dsCard group="Type" viewport="700x330" name="Type Scale" subtitle="Anton for display, Archivo for reading. Look-alikes: the game's UI font is unconfirmed" -->
-<html class="p5r-scope">
+<!doctype html>
+<html lang="en" class="p5r-scope">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Type Scale · Persona 5 Royal design system</title>
 <link rel="stylesheet" href="../styles.css">
 <link rel="icon" href="../assets/brand/phantom-thieves-logo.png">
 <style>
 body{margin:0;background:var(--surface-canvas);color:var(--text-on-dark);font-family:var(--font-body);padding:24px;display:grid;gap:10px}
-.r{display:flex;align-items:baseline;gap:16px}
+.r{display:flex;align-items:baseline;gap:var(--space-4);min-inline-size:0}
 .k{width:130px;flex:none;font-size:11px;color:var(--text-subtle-on-dark)}
 .d{font-family:var(--font-display);text-transform:uppercase;letter-spacing:var(--tracking-display);line-height:var(--leading-tight)}
+@media (max-width: 460px){
+  .r{display:grid;gap:var(--space-1)}
+  .d{overflow-wrap:anywhere}
+}
 </style>
 <div class="r"><span class="k">display-lg 64</span><span class="d" style="font-size:var(--text-display-lg)">Take your heart</span></div>
 <div class="r"><span class="k">display-md 44</span><span class="d" style="font-size:var(--text-display-md)">Targets: 2</span></div>

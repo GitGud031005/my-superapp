@@ -82,7 +82,16 @@ async function openPage(width) {
       await send('Page.navigate', { url });
       for (let i = 0; i < 100 && (await evaluate('document.readyState').catch(() => '')) !== 'complete'; i++) await sleep(100);
       await sleep(settle);
-      await evaluate('document.getAnimations().forEach((a) => a.finish())');
+      await evaluate(`document.getAnimations().forEach((animation) => {
+        const timing = animation.effect?.getComputedTiming();
+        if (!timing) return;
+        if (Number.isFinite(timing.endTime)) animation.finish();
+        else {
+          // Capture looping indicators at a visible, reproducible point.
+          animation.pause();
+          if (Number.isFinite(timing.duration)) animation.currentTime = timing.duration / 2;
+        }
+      })`);
       await sleep(200);
     },
     async close() { ws.close(); await fetch(`http://127.0.0.1:${port}/json/close/${target.id}`).catch(() => {}); },

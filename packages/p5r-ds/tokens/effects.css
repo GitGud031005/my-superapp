@@ -46,9 +46,9 @@
 --ease-exit:cubic-bezier(.4,0,1,1); /* @kind other. accelerates away: things leaving */
 --duration-fast:90ms; /* @kind other. small state swaps with no travel */
 --duration-press:60ms; /* @kind other. finger down: nearly instant */
---duration-hover:140ms; /* @kind other. pointer in: lift and colour wipe */
---duration-release:240ms; /* @kind other. pointer out or finger up: settles with --ease-spring */
---duration-exit:160ms; /* @kind other. dialog and other leave animations */
+--duration-hover:140ms; /* @kind other. pointer in: lift or settle after press */
+--duration-release:240ms; /* @kind other. spring settling for expressive motion */
+--duration-exit:160ms; /* @kind other. pointer out and dialog exit */
 --duration-slow:320ms; /* @kind other */
 --duration-pop:450ms; /* @kind other. ransom letters popping in */
 --duration-wipe:520ms; /* @kind other */

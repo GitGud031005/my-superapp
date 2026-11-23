@@ -2,6 +2,7 @@
 /* base palette. "measured" = pixel count on real P5R sprites; "card" = carried over from reference/calling-card and reference/phansite-prototype */
 --red-500:#ff0000; /* measured signature red: logo, banner, large surfaces, red text on black */
 --red-600:#e3001b; /* card red: fill behind small white text (white on it = 4.9:1, on #ff0000 only 4.0:1) */
+--red-650:#c20018;
 --red-700:#a10014; /* card dark red: ring alternation, pressed */
 --red-card:#e20000; /* measured on tycoon cards */
 --rose-500:#f60257; /* measured tarot pink */
@@ -10,8 +11,10 @@
 --ink-900:#0b0b0b; /* default dark canvas */
 --ink-850:#140c0c; /* measured title banner dark */
 --ink-700:#2a2a2a;
+--ink-600:#454545;
 --grey-500:#8a8a8a;
 --grey-300:#c9c9c9;
+--grey-200:#e4e4e4;
 --white:#ffffff;
 --paper:#ebe2cc; /* ransom-note paper tile */
 --cyan-500:#00aeff; /* measured: selected-item accent on skill/item icons */
@@ -25,6 +28,9 @@
 --surface-panel-dark: var(--black);
 --surface-panel-light: var(--white);
 --surface-hover-dark: var(--ink-700);
+--surface-pressed-dark: var(--ink-600);
+--surface-hover-light: var(--grey-200);
+--surface-pressed-light: var(--grey-300);
 --surface-hero: var(--red-500);
 --surface-paper: var(--paper);
 --surface-overlay: rgba(0,0,0,.78);
@@ -35,7 +41,7 @@
 --text-subtle-on-dark: var(--grey-500); /* 5.7:1 on ink-900, ok for small text */
 --text-on-light: var(--black);
 --text-muted-on-light: var(--ink-700); /* 14.35:1 on white; grey-500 was only 3.45:1 */
---text-on-red: var(--white); /* only on --red-600 or --red-700 at small sizes */
+--text-on-red: var(--white); /* use --red-600 or darker for small text */
 --text-red-on-dark: var(--red-500); /* 5.25:1 on black */
 --text-red-on-light: var(--red-600); /* 4.9:1 on white */
 --text-on-yellow: var(--black);
@@ -45,8 +51,9 @@
 /* semantic: accents */
 --accent-primary: var(--red-600);
 --accent-primary-hover: var(--red-500);
+--accent-primary-hover-dark: var(--red-650);
 --accent-primary-press: var(--red-700);
---accent-select: var(--cyan-500); /* the "selected" splash: strip, outline, underline */
+--accent-select: var(--cyan-500); /* the "selected" splash: strip and underline */
 --accent-highlight: var(--yellow-400); /* callouts and notifications */
 --accent-tarot: var(--rose-500);
 

@@ -1,7 +1,7 @@
 export interface CallingCardProps {
   /** Addressee line, for example "The Distorted King of Procrastination," */
   to: string;
-  /** The message, up to about 200 characters. The letters shrink to fit; below 560px wide the card turns portrait to keep them readable. A word too long to fit at a readable size breaks between its letter tiles */
+  /** The message. It wraps in body type and the card grows to fit longer text. */
   body: string;
   /** Defaults to "The Phantom Thieves of Hearts" */
   signature?: string;
@@ -11,8 +11,8 @@ export interface CallingCardProps {
   onFlip?: () => void;
   /** Change to reshuffle the letters */
   seed?: number;
-  /** Rotate the card -3deg like a card thrown on a table. Default true */
+  /** Rotate the card -3deg in wide containers. Default true. */
   tilted?: boolean;
-  /** Folder that contains brand/. Default "../../assets" works from a components/<group>/ card */
-  assetBase?: string;
+  /** Folder that contains brand/. Pass null to use the original CSS mark. */
+  assetBase?: string | null;
 }

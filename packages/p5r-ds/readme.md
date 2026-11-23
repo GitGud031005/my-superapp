@@ -1,6 +1,6 @@
 # Persona 5 Royal design system
 
-A design system for web pages in the Persona 5 Royal style: tokens, 15 React components, a page starter, a page checker, and a `SKILL.md` that tells Claude how to use it all.
+A design system for web pages in the Persona 5 Royal style: tokens, 16 React components, a page starter, a page checker, and a `SKILL.md` that tells Claude how to use it all.
 
 Fan-made, for personal and local use only. Persona belongs to Atlus and Sega. The logo and tarot sprites in `assets/` come from the game and must not be published.
 
@@ -13,6 +13,9 @@ python -m http.server 8000
 ```
 
 Then open http://localhost:8000/index.html. Opening the file directly (`file://`) does not work: the browser blocks Babel from loading `_ds_bundle.jsx`.
+
+- [Interaction States](components/controls/interaction-states.card.html) compares button states and includes a Vietnamese form with validation.
+- [Data States](components/feedback/data-states.card.html) shows loading, empty and error compositions with a retry flow.
 
 ## Scope
 
@@ -139,7 +142,7 @@ It needs Node 22 or newer and Chrome or Edge installed. Set `CHROME_PATH` if the
 | `styles.css` | The one stylesheet to load: fonts, tokens, component styles |
 | `tokens/` | Colors, fonts, typography, spacing, effects (shapes, shadows, motion) |
 | `components/components.css` | Styles for every component, prefix `p5r-` |
-| `components/{controls,navigation,surfaces,feedback,brand}/` | 15 components, each with `.jsx`, `.d.ts` (props) and `.prompt.md` (usage), plus one demo `*.card.html` per group |
+| `components/{controls,navigation,surfaces,feedback,brand}/` | 16 components, each with `.jsx`, `.d.ts` (props) and `.prompt.md` (usage), plus `*.card.html` demos |
 | `guidelines/` | Demo pages for color roles, type scale, shape language, motion |
 | `index.html` | Showcase of all demos |
 | `assets/` | Logo, 26 tarot cards, 3 button glyphs |

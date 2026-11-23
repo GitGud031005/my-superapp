@@ -126,6 +126,29 @@ Not covered by any sheet, and buildable without sprites (CSS clip-path, gradient
 
 Real gaps that sprites would fill: calendar and date art, results-screen ribbons and starburst, Palace/Mementos select backgrounds, minimap pieces. Names of matching sheets need the user to open the Spriters Resource list in their own Chrome.
 
+## 9. Design system audit and references
+
+The initial audit checked 13 pages in Chrome at 320, 375 and 1280px. Controls, navigation and dialogs passed the main keyboard flows. This included selection with arrow keys, skipping disabled menu options, closing a dialog with Escape, restoring focus, and disabling dialog motion under `prefers-reduced-motion`.
+
+| Priority | Finding | Suggested change |
+|---|---|---|
+| High | At 320px, Color Roles scrolls sideways by 7px and Surfaces by 20px. In the gallery's 250px frames, Feedback, Surfaces, Color Roles and Type Scale overflow. The wrapped navigation also covers the Color Roles heading after a section jump. | Let the color grid drop to two columns, cap demo widths to the available space, and use the actual navigation height for section offsets. Verify embedded and standalone pages. |
+| High | A caller's `aria-describedby` replaces the TextField hint and error references. A caller's `className` also replaces the base class. | Merge the caller's description IDs and classes with the defaults. |
+| Medium | MenuList points `aria-activedescendant` at a missing option if a saved selection disappears. Tabs keeps the first tab reachable but exposes no selected tab in the same case. | Define and test the behavior when items are removed or replaced. |
+| Medium | A StatBar configured as 150 out of 100 exposes a clamped `aria-valuenow` of 100 with the text “150 of 100.” The task-progress variant also exposes the meter role. | Keep the numeric value and accessible description consistent. Use the progressbar role for task completion. [W3C meter pattern](https://www.w3.org/WAI/ARIA/apg/patterns/meter/) |
+| Medium | The Brand heading breaks individual words at narrow widths, especially in the gallery iframe. | Fit the heading at the actual frame width and check long labels with Vietnamese diacritics. |
+| Medium | With local game assets unavailable, all six images in the Brand demo fail to load. | Add original CSS fallbacks for the preview so it remains usable in a clean checkout. |
+
+The public references include an official art book and independent web design systems. The search did not turn up an Atlus Figma library or a set of reusable web components.
+
+- **Royal art and production.** Kadokawa's official design book collects artwork and interviews with the production team. Atlus's official site provides visual references from the game. [Kadokawa book and preview](https://www.kadokawa.co.jp/product/322212001245/) · [Atlus Persona 5 Royal](https://persona.atlus.com/p5r/?lang=en)
+- **Information hierarchy and motion.** Masayoshi Sutoh and Kazuhisa Wada presented the original Persona 5 UI at CEDEC+KYUSHU. The presentation describes using placement, angle and luminance to guide attention and distinguish menu levels. On the web, apply those principles to one primary action at a time and short transitions that keep labels easy to read. [CEDEC+KYUSHU session](https://cedec-kyushu.jp/2017/session/16.html) · [Famitsu's presentation coverage](https://www.famitsu.com/news/201711/13145540.html)
+- **Independent web examples.** d0rich separates selectable rows from action lists and shows controls in different states. Chelsea Mai demonstrates how the visual language can carry over to charts and information-dense views. [d0rich design system](https://design.d0rich.me/) · [Chelsea Mai's case study](https://www.chelseamai.com/persona)
+
+The follow-up corrected the reported layout and component behavior in the design system. [Interaction States](../components/controls/interaction-states.card.html) exercises the form and button states. [Data States](../components/feedback/data-states.card.html) composes loading, empty and error states from existing components, and the Navigation and Surfaces demos show KeyHints in context. The Brand demo now uses the original CSS fallback artwork.
+
+The visual follow-up identified three mismatches. Data States now uses the same diagonal, white-outlined track as the stat bars with a single yellow strip. Reduced motion leaves a static strip in the track. The success toast example uses a CSS checkmark. CallingCard preserves cutout lettering in the heading and signature, and renders the message in body type on a solid light panel. Narrow cards stay upright and grow with the message.
+
 ## Sources
 
 - [RPGFan Persona 5 Royal screenshots](https://www.rpgfan.com/gallery/persona-5-royal-screenshots/) (screens inspected)

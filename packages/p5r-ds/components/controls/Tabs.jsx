@@ -3,7 +3,7 @@ import React, { useId, useRef } from 'react';
 export function Tabs({ items, value, onChange, label = 'Sections' }) {
   const uid = useId();
   const refs = useRef({});
-  // If value matches no tab, the first tab keeps the tab stop so the list stays keyboard-reachable
+  // Keep the selected tab and keyboard tab stop in sync when the old tab disappears.
   const current = items.some((i) => i.id === value) ? value : items[0]?.id;
   const select = (target) => {
     onChange(target.id);
@@ -28,7 +28,7 @@ export function Tabs({ items, value, onChange, label = 'Sections' }) {
           role="tab"
           type="button"
           id={item.panelId ? `${item.panelId}-tab` : `${uid}-tab-${i}`}
-          aria-selected={item.id === value}
+          aria-selected={item.id === current}
           aria-controls={item.panelId}
           tabIndex={item.id === current ? 0 : -1}
           className="p5r-tab"

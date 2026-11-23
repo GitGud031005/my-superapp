@@ -5,12 +5,12 @@ description: Build web UI and pages in the Persona 5 Royal style: red, black and
 
 # Persona 5 Royal design system: web pages and React UI
 
-This folder is a self-contained design system: CSS tokens, 15 React components and a page starter. Every path below is relative to this folder. In `my-superapp` it is `packages/p5r-ds/`; in other projects it usually sits at `p5r-ds/`. Check where it actually is before writing paths.
+This folder is a self-contained design system: CSS tokens, 16 React components and a page starter. Every path below is relative to this folder. In `my-superapp` it is `packages/p5r-ds/`; in other projects it usually sits at `p5r-ds/`. Check where it actually is before writing paths.
 
 | Path | What it is |
 |---|---|
 | `starter.html` | Page shell with every script and stylesheet wired. **Every no-build page starts as a copy of this file.** |
-| `index.js` / `index.d.ts` | Entry point for bundlers (Vite): all 15 components and their prop types. |
+| `index.js` / `index.d.ts` | Entry point for bundlers (Vite): all 16 components and their prop types. |
 | `styles.css` | The one stylesheet to load. It pulls in fonts, tokens and `components/components.css`. |
 | `_ds_bundle.jsx` | All components in one file for no-build pages, exposed as `window.PersonaFiveRoyalDS`. Generated: never edit. |
 | `components/<group>/<Name>.prompt.md` | Usage and examples for each component. Read it before using the component. |
@@ -39,11 +39,12 @@ This folder is a self-contained design system: CSS tokens, 15 React components a
 4. **Shadow.** Hard offset only, never blurred. Use `filter: drop-shadow` so the shadow follows a clip-path.
 5. **Type.** Display face (Anton) for short labels, titles and numerals. Everything longer than a line uses the body face (Archivo) with normal tracking and `--leading-normal`. Use `RansomTitle` for hero titles and short signatures, never for text people must read.
 6. **Selection.** The selected item scales up (`--menu-select-scale`) and carries a cyan strip; the current nav link is cyan. Never use color alone for state.
-7. **Motion.** Fast and snappy (`--ease-snap`; `--ease-slam` for things that land, like a dialog). One vocabulary for interactive parts: hover in `--duration-hover` (140ms, `--ease-snap`), press in `--duration-press` (60ms), release and settle in `--duration-release` (240ms, `--ease-spring`, slight overshoot), leaving in `--duration-exit` (160ms, `--ease-exit`). A press keeps the hover pose and only adds scale; never let it jump. Animate `transform`, `clip-path` or `background-position`, never `box-shadow`. `--duration-fast` (90ms) is for small swaps with no travel; entrances up to 320ms; only showpieces run longer (`--duration-pop` 450ms, `--duration-flip` 700ms). Use the `--duration-*` tokens; never invent durations. Gate hover styles with `@media (hover: hover)`. Everything stops under `prefers-reduced-motion` (handled in `components.css`; page CSS must do the same for its own motion).
-8. **Accessibility.** Keep the focus ring (`--focus-ring`: cyan on dark; class `p5r-light` turns it black on light surfaces; red panels turn it white). Keyboard behavior is built into `MenuList`, `Tabs` and `Dialog`; never replace it with click-only handlers. Every page has `lang`, one `h1`, a skip link and a `<main id="main">`.
+7. **Motion.** Keep button hit areas fixed and move their decorative layers with `transform`. Use `--ease-snap` for hover (140ms), press (60ms) and returning to rest (160ms). Use `--duration-fast` (90ms) for fill changes that preserve label contrast. Reserve `--duration-release` (240ms) and `--ease-spring` for expressive settling. Gate hover with `@media (hover: hover)` and respect `prefers-reduced-motion` in both shared and page CSS.
+8. **Accessibility.** Use the surface-aware `--focus-ring` for keyboard focus. It is white on dark and red surfaces and black on light surfaces. Text fields mark focus with a black inset underline. Cyan identifies selected items. Preserve the keyboard behavior built into `MenuList`, `Tabs` and `Dialog`. Every page has `lang`, one `h1`, a skip link and a `<main id="main">`.
 9. **Buttons by surface.** On dark surfaces: `primary` for the one main action, `light` for the rest. On light panels: `primary` and `dark`. A `light` button on a light panel disappears. One `primary` per view.
 10. **Layout.** Page layout uses the spacing tokens (`--space-*`) and logical properties (`inset-inline-start`, `padding-inline`), wraps rows with `flex-wrap`, and never scrolls sideways at 320px.
 11. **Scope.** All tokens live on `.p5r-scope`, not `:root`. The UI must render inside an element with that class (`<html class="p5r-scope">` for plain pages, a wrapper `<div className="p5r-scope">` around the module root in React); outside it every `var(--...)` is empty. In `my-superapp` only `modules/phantom-ledger` may import this design system. Never import it from `apps/web` or any other module, and never move tokens back to `:root`.
+12. **Button groups.** Use `.p5r-button-row` for adjacent buttons or keep at least `--space-button-inline` (40px) horizontally and `--space-button-block` (24px) between rows in custom layouts. The gaps account for the skewed faces, echo plates and focus outlines. Let the group wrap on narrow screens. Dialog actions apply the same spacing.
 
 ## Components
 
@@ -55,6 +56,7 @@ This folder is a self-contained design system: CSS tokens, 15 React components a
 | Action | `Button` | see rule 9 |
 | Switch view in place | `Tabs` | pair each tab with a `role="tabpanel"` element via `panelId` |
 | Pick from a list (game-menu style) | `MenuList` | a listbox, not site navigation; use links for navigation |
+| Show available keyboard actions | `KeyHints` | list the shortcuts implemented by the current region |
 | Text input | `TextField` | always a `label`; `multiline` for long text; `error` shows next to the field |
 | Small label | `Tag` | tones red, white, black, yellow, cyan; `sticker` for one emphasis per view |
 | Bar value | `StatBar` | `kind` hp, sp or progress |
@@ -62,7 +64,7 @@ This folder is a self-contained design system: CSS tokens, 15 React components a
 | Short notice | `AwardToast` | yellow title, one line of detail |
 | Quote or dialogue | `SpeechBubble` | `speaker` for the name tag |
 | Date | `DateSticker` | |
-| Showpiece | `CallingCard`, `TarotCard` | pass `assetBase`; `TarotCard` needs `name` (the sheet has no names) |
+| Showpiece | `CallingCard`, `TarotCard` | pass `assetBase` for images or `null` for CSS artwork; give each TarotCard a name |
 
 Site navigation is not a component: use the `.site-nav` links in `starter.html` (skewed white links, the current page `aria-current="page"` in cyan).
 

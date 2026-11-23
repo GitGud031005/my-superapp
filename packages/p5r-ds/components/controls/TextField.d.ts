@@ -11,4 +11,6 @@ export interface TextFieldProps extends NativeFieldProps {
   hint?: string;
   /** Message text without the "Error:" prefix, which the component adds */
   error?: string;
+  /** Localized prefix for the validation message. Defaults to "Error:". */
+  errorPrefix?: string;
 }

@@ -3,6 +3,7 @@ export { Tabs } from './components/controls/Tabs.jsx';
 export { Tag } from './components/controls/Tag.jsx';
 export { TextField } from './components/controls/TextField.jsx';
 export { MenuList } from './components/navigation/MenuList.jsx';
+export { KeyHints } from './components/navigation/KeyHints.jsx';
 export { Banner } from './components/surfaces/Banner.jsx';
 export { DateSticker } from './components/surfaces/DateSticker.jsx';
 export { Dialog } from './components/surfaces/Dialog.jsx';

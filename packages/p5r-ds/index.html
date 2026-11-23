@@ -19,7 +19,7 @@ nav a > span{ display:inline-block; transform:skewX(calc(var(--skew-menu) * -1))
 nav a:focus-visible{ outline:3px solid var(--focus-ring); outline-offset:4px; }
 @media (hover:hover){ nav a:hover{ background:var(--accent-select); } }
 main{ padding:var(--space-6); display:grid; gap:var(--space-9); max-width:1100px; }
-section{ display:grid; gap:var(--space-6); scroll-margin-top:96px; }
+section{ display:grid; gap:var(--space-6); scroll-margin-top:calc(var(--nav-height, 96px) + var(--space-3)); }
 h2{ margin:0; justify-self:start; padding:var(--space-2) var(--space-6); background:var(--accent-primary); color:var(--text-on-red); font:400 var(--text-heading-lg)/1 var(--font-display); text-transform:uppercase; letter-spacing:var(--tracking-display); clip-path:var(--clip-banner); }
 .card{ display:grid; gap:var(--space-3); }
 .card h3{ margin:0; font:400 var(--text-heading-md)/1.1 var(--font-display); text-transform:uppercase; letter-spacing:var(--tracking-display); }
@@ -35,7 +35,7 @@ h2{ margin:0; justify-self:start; padding:var(--space-2) var(--space-6); backgro
   <p class="lede">Tokens, guidelines and React components in the style of the Phantom Thieves. Personal, local use only: game art belongs to Atlus and Sega.</p>
 </header>
 <nav aria-label="Sections" id="nav"></nav>
-<main id="main"></main>
+<main id="main" tabindex="-1"></main>
 <script>
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids); return n; };
@@ -45,7 +45,11 @@ function autoHeight(frame, fallback) {
   frame.style.height = `${fallback}px`;
   frame.addEventListener('load', () => {
     const doc = frame.contentDocument;
-    const fit = () => { frame.style.height = `${Math.max(doc.documentElement.scrollHeight, 120)}px`; };
+    const fit = () => {
+      const margins = frame.contentWindow.getComputedStyle(doc.body);
+      const height = doc.body.getBoundingClientRect().height + parseFloat(margins.marginTop) + parseFloat(margins.marginBottom);
+      frame.style.height = `${Math.max(Math.ceil(height), 120)}px`;
+    };
     fit();
     new frame.contentWindow.ResizeObserver(fit).observe(doc.body);
   });
@@ -61,6 +65,7 @@ fetch('_ds_manifest.json').then((r) => r.json()).then((m) => {
 
   const nav = document.getElementById('nav');
   const main = document.getElementById('main');
+  new ResizeObserver(() => main.style.setProperty('--nav-height', `${nav.offsetHeight}px`)).observe(nav);
   for (const g of names) {
     nav.append(el('a', { href: `#${slug(g)}` }, el('span', { textContent: g })));
     const section = el('section', { id: slug(g) }, el('h2', { textContent: g }));

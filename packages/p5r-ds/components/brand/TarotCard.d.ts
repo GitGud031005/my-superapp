@@ -11,6 +11,6 @@ export interface TarotCardProps {
   tilt?: string;
   /** When given, the card becomes a toggle button named "Show the back of {name}"; aria-pressed follows `back` */
   onFlip?: () => void;
-  /** Folder that contains tarot/. Default "../../assets" works from a components/<group>/ card */
-  assetBase?: string;
+  /** Folder that contains tarot/. Pass null to use the original CSS card faces. */
+  assetBase?: string | null;
 }

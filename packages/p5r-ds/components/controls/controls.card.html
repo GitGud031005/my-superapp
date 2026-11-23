@@ -1,44 +1,80 @@
-<!-- @dsCard group="Components" viewport="700x420" name="Controls" subtitle="Button, TextField, Tag, Tabs" -->
-<html class="p5r-scope">
+<!-- @dsCard group="Components" viewport="700x420" name="Controls" subtitle="Button and field states on dark, light and red surfaces" -->
+<!doctype html>
+<html lang="en" class="p5r-scope">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controls · Persona 5 Royal design system</title>
 <link rel="stylesheet" href="../../styles.css">
 <link rel="icon" href="../../assets/brand/phantom-thieves-logo.png">
+<style>
+body{ margin:0; background:var(--surface-canvas); color:var(--text-on-dark); font:var(--weight-body) var(--text-body-md)/var(--leading-normal) var(--font-body); }
+main{ display:grid; gap:var(--space-7); padding:var(--space-5); }
+h1, h2{ margin:0; font:400 var(--text-heading-md)/1.1 var(--font-display); letter-spacing:var(--tracking-display); text-transform:uppercase; }
+h2{ font-size:var(--text-control); }
+p{ margin:0; color:var(--text-muted-on-dark); }
+.skip{ position:absolute; inset-block-start:-100px; padding:var(--space-2); background:var(--surface-panel-light); color:var(--text-on-light); z-index:1; }
+.skip:focus{ inset-block-start:var(--space-3); }
+.demo-group{ display:grid; gap:var(--space-4); min-inline-size:0; }
+.demo-row{ display:flex; flex-wrap:wrap; gap:var(--space-4) var(--space-6); align-items:center; }
+.demo-surfaces{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap:var(--space-5); }
+.demo-surfaces .p5r-panel{ display:grid; align-content:start; gap:var(--space-4); min-inline-size:0; }
+</style>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script type="text/babel" src="../../_ds_bundle.jsx"></script>
-<div id="root" style="background:var(--surface-canvas);color:var(--text-on-dark);font-family:var(--font-body);padding:32px;box-sizing:border-box"></div>
+<a class="skip" href="#main">Skip to controls</a>
+<main id="main" tabIndex="-1"></main>
 <script type="text/babel">
 const { Button, TextField, Tag, Tabs, Panel } = window.PersonaFiveRoyalDS;
 function Demo(){
   const [tab, setTab] = React.useState('targets');
-  const [to, setTo] = React.useState('The Distorted King of Procrastination,');
+  const [to, setTo] = React.useState('The Palace Keeper');
   const [msg, setMsg] = React.useState('');
   return (
-    <div style={{display:'grid',gap:28}}>
-      <div style={{display:'grid',gap:12}}>
+    <>
+      <h1>Controls</h1>
+      <section className="demo-group" aria-labelledby="buttons-heading">
+        <h2 id="buttons-heading">Buttons</h2>
+        <p>Hover, press or use Tab to try each state.</p>
+        <div className="p5r-button-row">
+          <Button variant="primary">Send the card</Button>
+          <Button>Shuffle letters</Button>
+          <Button variant="dark" disabled>Unavailable</Button>
+        </div>
+      </section>
+      <section className="demo-group" aria-labelledby="fields-heading">
+        <h2 id="fields-heading">Text fields</h2>
+        <p>A black underline marks the active field across every surface.</p>
+        <div className="demo-surfaces">
+          <Panel tone="dark" title="Dark surface" tilt="0deg">
+            <TextField label="To" value={to} onChange={(e)=>setTo(e.target.value)} hint="Who is the target?" />
+          </Panel>
+          <Panel tone="light" title="Light surface" tilt="0deg">
+            <TextField label="Your message" multiline value={msg} onChange={(e)=>setMsg(e.target.value)} error={msg ? undefined : 'Write a message for the card'} />
+            <div className="demo-row"><Button variant="dark" size="sm">Preview card</Button></div>
+          </Panel>
+          <Panel tone="red" title="Red surface" tilt="0deg">
+            <TextField label="Codename" defaultValue="Joker" />
+            <TextField label="Status" defaultValue="Archived" disabled />
+          </Panel>
+        </div>
+      </section>
+      <section className="demo-group" aria-labelledby="tabs-heading">
+        <h2 id="tabs-heading">Tabs</h2>
         <Tabs items={[{id:'targets',label:'Targets',panelId:'panel-targets'},{id:'board',label:'Board',panelId:'panel-board'},{id:'tarot',label:'Tarot',panelId:'panel-tarot'}]} value={tab} onChange={setTab} />
         {[['targets','Three targets are waiting.'],['board','The board has 4 new posts.'],['tarot','Draw a card to see your arcana.']].map(([id,text]) => (
-          <p key={id} role="tabpanel" id={`panel-${id}`} aria-labelledby={`panel-${id}-tab`} hidden={tab !== id} style={{margin:0,color:'var(--text-muted-on-dark)'}}>{text}</p>
+          <p key={id} role="tabpanel" id={`panel-${id}`} aria-labelledby={`panel-${id}-tab`} hidden={tab !== id}>{text}</p>
         ))}
-      </div>
-      <div style={{display:'flex',gap:20,flexWrap:'wrap',alignItems:'center'}}>
-        <Button variant="primary">Send the card</Button>
-        <Button>Shuffle letters</Button>
-        <Button variant="dark">Back</Button>
-        <Button variant="primary" disabled>Disabled</Button>
-      </div>
-      <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
-        <Tag tone="red">Wanted</Tag><Tag tone="white">Day 12</Tag><Tag tone="black">Cleared</Tag><Tag tone="yellow">New</Tag><Tag tone="cyan">Selected</Tag><Tag tone="sticker">Rank up!</Tag>
-      </div>
-      <div style={{display:'grid',gap:20,maxWidth:480}}>
-        <TextField label="To" value={to} onChange={(e)=>setTo(e.target.value)} hint="Who is the target?" />
-        <TextField label="Your message" multiline value={msg} onChange={(e)=>setMsg(e.target.value)} error={msg ? undefined : 'Write a message for the card'} />
-      </div>
-      <Panel tone="red" title="On a red panel" tilt="0deg" style={{maxWidth:480}}>
-        <TextField label="Codename" value="Joker" onChange={()=>{}} hint="Labels and hints turn white here" />
-      </Panel>
-    </div>
+      </section>
+      <section className="demo-group" aria-labelledby="tags-heading">
+        <h2 id="tags-heading">Tags</h2>
+        <div className="demo-row">
+          <Tag tone="red">Wanted</Tag><Tag tone="white">Day 12</Tag><Tag tone="black">Cleared</Tag><Tag tone="yellow">New</Tag><Tag tone="cyan">Selected</Tag><Tag tone="sticker">Rank up!</Tag>
+        </div>
+      </section>
+    </>
   );
 }
-ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+ReactDOM.createRoot(document.getElementById('main')).render(<Demo />);
 </script>

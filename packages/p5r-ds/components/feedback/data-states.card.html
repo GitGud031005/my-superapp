@@ -1,0 +1,100 @@
+<!-- @dsCard group="Components" viewport="700x500" name="Data States" subtitle="Loading, empty and error patterns" -->
+<!doctype html>
+<html lang="vi" class="p5r-scope">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trạng thái dữ liệu · Persona 5 Royal design system</title>
+<link rel="stylesheet" href="../../styles.css">
+<link rel="icon" href="data:,">
+<style>
+body{margin:0;background:var(--surface-canvas);color:var(--text-on-dark);font:var(--weight-body) var(--text-body-md)/var(--leading-normal) var(--font-body)}
+main{display:grid;gap:var(--space-6);padding:clamp(var(--space-4),6vw,var(--space-6))}
+h1,h2,p{margin:0}
+h1{font:400 var(--text-heading-md)/1.2 var(--font-display);text-transform:uppercase}
+.skip{position:absolute;inset-block-start:-100px;padding:var(--space-2);background:var(--surface-panel-light);color:var(--text-on-light);z-index:1}
+.skip:focus{inset-block-start:var(--space-3)}
+.status-detail{margin-block:var(--space-4)}
+.status-actions{display:flex;flex-wrap:wrap;gap:var(--space-4)}
+.status-actions .p5r-btn{margin-inline-start:var(--space-1)}
+.status-progress{
+  display:block;box-sizing:border-box;inline-size:min(100%,12rem);block-size:14px;overflow:hidden;
+  border:2px solid var(--stroke-on-dark);background:var(--surface-panel-dark);transform:skewX(var(--skew-menu))
+}
+.status-progress::before{
+  content:'';display:block;inline-size:calc(100% / 3);block-size:100%;background:var(--accent-highlight);
+  animation:status-sweep calc(var(--duration-wipe) * 3) linear infinite
+}
+@keyframes status-sweep{
+  from{transform:translateX(-100%)}
+  to{transform:translateX(300%)}
+}
+@media (prefers-reduced-motion: reduce){.status-progress::before{animation:none;transform:translateX(100%)}}
+@media (forced-colors: active){.status-progress::before{background:Highlight;forced-color-adjust:none}}
+[role="tabpanel"]{min-inline-size:0}
+
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../../_ds_bundle.jsx"></script>
+<a class="skip" href="#main">Bỏ qua đến nội dung</a>
+<main id="main" tabindex="-1"></main>
+<script type="text/babel">
+const { Banner, Button, Panel, Tabs } = PersonaFiveRoyalDS;
+const tabs = [
+  { id:'loading', label:'Đang tải', panelId:'state-loading' },
+  { id:'empty', label:'Dữ liệu rỗng', panelId:'state-empty' },
+  { id:'error', label:'Gặp lỗi', panelId:'state-error' },
+];
+
+function Demo() {
+  const [view, setView] = React.useState('loading');
+  const [retrying, setRetrying] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!retrying) return;
+    const timer = setTimeout(() => {
+      if (document.activeElement?.id === 'state-loading-tab') document.getElementById('state-empty-tab').focus();
+      setView('empty');
+      setRetrying(false);
+    }, 900);
+    return () => clearTimeout(timer);
+  }, [retrying]);
+
+  function retry() {
+    document.getElementById('state-loading-tab').focus();
+    setView('loading');
+    setRetrying(true);
+  }
+
+  return (
+    <>
+      <h1>Trạng thái dữ liệu</h1>
+      <Tabs items={tabs} value={view} label="Các trạng thái dữ liệu" onChange={(next) => { setRetrying(false); setView(next); }} />
+      <div id="state-loading" role="tabpanel" aria-labelledby="state-loading-tab" hidden={view !== 'loading'}>
+        <Panel>
+          <Banner as="h2" tone="white" tilt="0deg">Đang tải</Banner>
+          <p className="status-detail" role="status">Đang lấy danh sách mới nhất.</p>
+          <progress className="p5r-sr-only" aria-label="Tiến độ tải danh sách" />
+          <span className="status-progress" aria-hidden="true" />
+        </Panel>
+      </div>
+      <div id="state-empty" role="tabpanel" aria-labelledby="state-empty-tab" hidden={view !== 'empty'}>
+        <Panel tone="light">
+          <Banner as="h2" tone="black" tilt="0deg">Chưa có mục nào</Banner>
+          <p className="status-detail">Các mục mới sẽ xuất hiện ở đây.</p>
+          <div className="status-actions"><Button variant="dark" onClick={retry}>Làm mới</Button></div>
+        </Panel>
+      </div>
+      <div id="state-error" role="tabpanel" aria-labelledby="state-error-tab" hidden={view !== 'error'}>
+        <Panel>
+          <Banner as="h2" tilt="0deg">Không tải được</Banner>
+          <p className="status-detail">Kết nối bị gián đoạn. Kiểm tra mạng rồi thử lại.</p>
+          <div className="status-actions"><Button variant="primary" onClick={retry}>Thử lại</Button></div>
+        </Panel>
+      </div>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('main')).render(<Demo />);
+</script>

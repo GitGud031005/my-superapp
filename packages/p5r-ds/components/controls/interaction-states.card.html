@@ -1,0 +1,89 @@
+<!-- @dsCard group="Components" viewport="700x500" name="Interaction States" subtitle="Button and TextField regression examples" -->
+<!doctype html>
+<html lang="vi" class="p5r-scope">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trạng thái tương tác · Persona 5 Royal design system</title>
+<link rel="stylesheet" href="../../styles.css">
+<link rel="icon" href="data:,">
+<style>
+body{margin:0;background:var(--surface-canvas);color:var(--text-on-dark);font:var(--weight-body) var(--text-body-md)/var(--leading-normal) var(--font-body)}
+main{display:grid;gap:var(--space-6);padding:clamp(var(--space-4),6vw,var(--space-6))}
+h1,h2,p{margin:0}
+h1{font:400 var(--text-heading-md)/1.2 var(--font-display);text-transform:uppercase}
+.skip{position:absolute;inset-block-start:-100px;padding:var(--space-2);background:var(--surface-panel-light);color:var(--text-on-light);z-index:1}
+.skip:focus{inset-block-start:var(--space-3)}
+.qa-surfaces{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));gap:var(--space-4);min-inline-size:0}
+.qa-panel{display:grid;gap:var(--space-4);min-inline-size:0}
+.qa-panel h2{font:400 var(--text-control)/1.2 var(--font-display);text-transform:uppercase}
+.qa-states{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,8rem),1fr));gap:var(--space-4);list-style:none;margin:0;padding:0}
+.qa-states li{display:grid;gap:var(--space-2);justify-items:start;font-size:var(--text-body-sm)}
+.qa-states .p5r-btn{padding-inline:var(--space-3)}
+.qa-states [data-example="hover"] .p5r-btn{--btn-fill:var(--btn-hover)}
+.qa-states [data-example="pressed"] .p5r-btn{--btn-fill:var(--btn-pressed)}
+.qa-states [data-example="focus"] .p5r-btn{outline:3px solid var(--focus-ring);outline-offset:4px}
+.qa-live{display:grid;gap:var(--space-4)}
+.qa-live .p5r-btn{justify-self:start;padding-block:var(--space-2);max-inline-size:calc(100% - var(--space-4))}
+.qa-live p{font-size:var(--text-body-sm);color:var(--text-muted-on-dark)}
+.qa-field{font-variant-numeric:tabular-nums}
+
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../../_ds_bundle.jsx"></script>
+<a class="skip" href="#main">Bỏ qua đến nội dung</a>
+<main id="main" tabindex="-1"></main>
+<script type="text/babel">
+const { Button, Panel, TextField } = PersonaFiveRoyalDS;
+const states = [
+  ['default', 'Mặc định'], ['hover', 'Rê chuột'], ['pressed', 'Nhấn'],
+  ['focus', 'Focus'], ['disabled', 'Vô hiệu hóa'],
+];
+
+function ButtonStates({ tone, title, variant }) {
+  return (
+    <Panel tone={tone}>
+      <div className="qa-panel">
+        <h2>{title}</h2>
+        <ul className="qa-states" role="list">
+          {states.map(([id, label]) => (
+            <li key={id} data-example={id}>
+              <span>{label}</span>
+              <span inert=""><Button variant={variant} size="sm" disabled={id === 'disabled'}>Tiếp tục</Button></span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Panel>
+  );
+}
+
+function Demo() {
+  const [value, setValue] = React.useState('');
+  const [sorted, setSorted] = React.useState(false);
+  return (
+    <>
+      <h1>Trạng thái tương tác</h1>
+      <div className="qa-surfaces">
+        <ButtonStates tone="dark" title="Nền tối · nút sáng" variant="light" />
+        <ButtonStates tone="light" title="Nền sáng · nút tối" variant="dark" />
+      </div>
+      <section className="qa-live" aria-label="Thử trực tiếp">
+        <Button onClick={() => setSorted((previous) => !previous)}>Shuffle letters</Button>
+        <p role="status">{sorted ? 'Đã xáo trộn chữ.' : 'Rê chuột, nhấn hoặc dùng Tab để thử nút.'}</p>
+        <Button variant="primary" onClick={() => document.getElementById('qa-input').focus()}>Chuyển đến ô nhập thông tin bổ sung</Button>
+        <TextField
+          id="qa-input" className="qa-field" label="Ghi chú cho lần cập nhật sắp tới"
+          multiline value={value} onChange={(event) => setValue(event.target.value)}
+          hint="Nêu một chi tiết giúp người đọc hiểu nội dung."
+          error={value.trim() ? undefined : 'Vui lòng nhập ghi chú.'}
+          errorPrefix="Lỗi:" aria-describedby="qa-format"
+        />
+        <p id="qa-format">Có thể nhập tiếng Việt có dấu.</p>
+      </section>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('main')).render(<Demo />);
+</script>

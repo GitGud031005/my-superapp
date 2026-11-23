@@ -1,47 +1,62 @@
 <!-- @dsCard group="Components" viewport="700x860" name="Surfaces" subtitle="Panel, Banner, SpeechBubble, DateSticker, Dialog" -->
-<html class="p5r-scope">
+<!doctype html>
+<html lang="en" class="p5r-scope">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surfaces · Persona 5 Royal design system</title>
 <link rel="stylesheet" href="../../styles.css">
 <link rel="icon" href="../../assets/brand/phantom-thieves-logo.png">
+<style>
+body{margin:0;background:var(--surface-canvas);color:var(--text-on-dark);font-family:var(--font-body)}
+#root{padding:clamp(var(--space-4), 6vw, var(--space-6))}
+.surface-demo{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-7)}
+.surface-row > *{box-sizing:border-box;max-inline-size:100%}
+.surface-row > .p5r-echo{max-inline-size:calc(100% - var(--space-5))}
+@media (max-width: 375px){
+  .surface-row .p5r-banner__shape{padding-inline:var(--space-5)}
+}
+</style>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script type="text/babel" src="../../_ds_bundle.jsx"></script>
-<div id="root" style="background:var(--surface-canvas);color:var(--text-on-dark);font-family:var(--font-body);padding:32px;box-sizing:border-box"></div>
+<div id="root"></div>
 <script type="text/babel">
-const { Panel, Banner, SpeechBubble, DateSticker, Dialog, Button } = window.PersonaFiveRoyalDS;
+const { Panel, Banner, SpeechBubble, DateSticker, Dialog, Button, KeyHints } = window.PersonaFiveRoyalDS;
 function Demo(){
   const [open, setOpen] = React.useState(false);
   return (
-    <div style={{display:'grid',gap:36}}>
-      <div style={{display:'flex',gap:32,flexWrap:'wrap',alignItems:'center'}}>
+    <div className="surface-demo">
+      <div className="surface-row" style={{display:'flex',gap:32,flexWrap:'wrap',alignItems:'center'}}>
         <Banner as="h2">Targets: 2</Banner>
         <Banner tone="black" tilt="1deg">Mementos</Banner>
         <DateSticker month={11} day={16} weekday="Monday" period="After school" />
       </div>
-      <div style={{display:'flex',gap:32,flexWrap:'wrap',alignItems:'flex-start'}}>
+      <div className="surface-row" style={{display:'flex',gap:32,flexWrap:'wrap',alignItems:'flex-start'}}>
         <SpeechBubble speaker="Morgana" tailX={30}>We should steal that heart before Friday.</SpeechBubble>
         <Panel title="Mission" tilt="-1.5deg" style={{width:240}}>Steal the heart before the deadline.</Panel>
         <Panel tone="light" style={{width:200}}>Readable body copy sits on a light panel.</Panel>
       </div>
-      <div style={{display:'flex',gap:40,flexWrap:'wrap',alignItems:'flex-start'}}>
+      <div className="surface-row" style={{display:'flex',gap:40,flexWrap:'wrap',alignItems:'flex-start'}}>
         <span className="p5r-echo" style={{display:'inline-block'}}><Banner tone="black" tilt="-2deg">Echo plate</Banner></span>
         <div className="p5r-echo" style={{width:220,'--echo-x':'10px','--echo-y':'9px'}}><Panel tone="light" style={{width:'auto'}}>A plate behind a panel.</Panel></div>
       </div>
-      <div style={{display:'flex',gap:28,flexWrap:'wrap',alignItems:'flex-start'}}>
+      <div className="surface-row" style={{display:'flex',gap:28,flexWrap:'wrap',alignItems:'flex-start'}}>
         {['a','b','c'].map((v) => (
           <div key={v} className={`p5r-quad p5r-quad--${v}`} style={{width:200}}>
             <div className="p5r-quad__edge"><div className="p5r-quad__body">Quad {v}: four sides, none parallel.</div></div>
           </div>
         ))}
       </div>
-      <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
+      <div className="surface-row" style={{display:'flex',gap:16,flexWrap:'wrap'}}>
         <div style={{width:300,height:140,background:'var(--starfield)'}} role="img" aria-label="Red and black star field sample" />
         <div style={{width:300,height:140,background:'var(--starfield-mono)'}} role="img" aria-label="Black and white star field sample" />
       </div>
       <div><Button variant="primary" onClick={()=>setOpen(true)}>Open dialog</Button></div>
       <Dialog open={open} title="Send the card?" onClose={()=>setOpen(false)} closeLabel="Close"
         actions={<><Button onClick={()=>setOpen(false)}>Cancel</Button><Button variant="primary" onClick={()=>setOpen(false)}>Send the card</Button></>}>
-        The target will receive it tomorrow.
+        <p>The target will receive it tomorrow.</p>
+        <KeyHints items={[{keys:'Tab', action:'Next action'}, {keys:'Esc', action:'Close'}]} />
       </Dialog>
     </div>
   );

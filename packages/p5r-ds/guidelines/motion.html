@@ -1,23 +1,28 @@
 <!-- @dsCard group="Motion" viewport="700x300" name="Motion" subtitle="Chosen values inspired by the game. Only the day-change timing has a source" -->
-<html class="p5r-scope">
+<!doctype html>
+<html lang="en" class="p5r-scope">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion · Persona 5 Royal design system</title>
 <link rel="stylesheet" href="../styles.css">
 <link rel="icon" href="../assets/brand/phantom-thieves-logo.png">
 <style>
 body{margin:0;background:var(--surface-canvas);color:var(--text-on-dark);font:13px var(--font-body);padding:24px}
-table{border-collapse:collapse;width:100%}
-td,th{padding:7px 8px;border-bottom:1px solid var(--border-subtle-on-dark);text-align:left}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+td,th{padding:7px 8px;border-bottom:1px solid var(--border-subtle-on-dark);text-align:left;overflow-wrap:anywhere}
+th:last-child{width:42%}
 th{color:var(--text-red-on-dark);font:400 13px var(--font-display);letter-spacing:.1em;text-transform:uppercase}
 code{color:var(--yellow-400)}
 </style>
 <table>
-  <tr><th>Token</th><th>Value</th><th>Source</th></tr>
-  <tr><td>--duration-press</td><td><code>60ms</code></td><td>chosen. Finger down: button sinks, close button shrinks</td></tr>
-  <tr><td>--duration-hover</td><td><code>140ms</code></td><td>chosen. Pointer in: lift, colour wipe, tab fill, menu selection</td></tr>
-  <tr><td>--duration-release</td><td><code>240ms</code></td><td>chosen. Pointer out or finger up: settles with --ease-spring</td></tr>
-  <tr><td>--duration-exit</td><td><code>160ms</code></td><td>chosen. Dialog leaves with --ease-exit</td></tr>
-  <tr><td>--duration-fast</td><td><code>90ms</code></td><td>chosen. Small swaps with no travel</td></tr>
+  <tr><th scope="col">Token</th><th scope="col">Value</th><th scope="col">Usage</th></tr>
+  <tr><td>--duration-press</td><td><code>60ms</code></td><td>Button face sinks or close icon shrinks</td></tr>
+  <tr><td>--duration-hover</td><td><code>140ms</code></td><td>Button face lifts or settles after press, menu selection shifts</td></tr>
+  <tr><td>--duration-release</td><td><code>240ms</code></td><td>Expressive settling with --ease-spring</td></tr>
+  <tr><td>--duration-exit</td><td><code>160ms</code></td><td>Button returns to rest with --ease-snap, dialog exits with --ease-exit</td></tr>
+  <tr><td>--duration-fast</td><td><code>90ms</code></td><td>Button and tab background colour feedback</td></tr>
   <tr><td>--duration-slow</td><td><code>320ms</code></td><td>chosen. Menu enter, dialog, toast</td></tr>
-  <tr><td>--duration-wipe</td><td><code>520ms</code></td><td>chosen. Screen wipes</td></tr>
+  <tr><td>--duration-wipe</td><td><code>520ms</code></td><td>Screen wipes. The loading strip takes three times as long per pass.</td></tr>
   <tr><td>--duration-pop</td><td><code>450ms</code></td><td>chosen. Ransom tile entry only (showpiece, not interface feedback)</td></tr>
   <tr><td>--duration-flip</td><td><code>700ms</code></td><td>chosen. Calling card and tarot flips only (showpiece)</td></tr>
   <tr><td>--stagger</td><td><code>40ms</code></td><td>chosen. Between menu items</td></tr>
@@ -27,5 +32,6 @@ code{color:var(--yellow-400)}
   <tr><td>--ease-slam</td><td><code>cubic-bezier(.5,0,.1,1)</code></td><td>chosen. Slow wind-up, hard landing. Dialog entrance</td></tr>
   <tr><td>day-change</td><td><code>6s + 2s + 4s</code></td><td>fan study, not from Atlus</td></tr>
 </table>
-<p style="color:var(--text-muted-on-dark);margin-top:14px">One vocabulary for every control: hover is a fast lift and a hard-stop colour wipe along the slant, press sinks without leaving the hover pose, release springs back slower than it went in. Only transform and background-position move; no shadow is animated.</p>
-<p style="color:var(--text-muted-on-dark);margin-top:14px">All animation is switched off under prefers-reduced-motion.</p>
+<p style="color:var(--text-muted-on-dark);margin-top:14px">A button keeps the same hit area in every state. Its face and label move together, and the fill shifts within the same contrast pairing.</p>
+<p style="color:var(--text-muted-on-dark);margin-top:14px">The loading strip moves at a constant speed and keeps the same width. It indicates activity while the amount of work is unknown.</p>
+<p style="color:var(--text-muted-on-dark);margin-top:14px">With prefers-reduced-motion, state colours update immediately and decorative layers stay in place.</p>

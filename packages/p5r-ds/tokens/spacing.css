@@ -10,6 +10,9 @@
 --space-9:96px;
 --space-10:128px;
 
+--space-button-inline:calc(var(--space-6) + var(--space-2)); /* 40px for echo plates and focus outlines */
+--space-button-block:var(--space-5); /* 24px between wrapped buttons */
+
 --container-max:1200px;
 --hud-inset:32px; /* distance of HUD blocks from the screen edge */
 --menu-gap:10px; /* vertical gap between stacked menu items */

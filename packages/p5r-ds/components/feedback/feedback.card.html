@@ -1,18 +1,33 @@
 <!-- @dsCard group="Components" viewport="700x300" name="Feedback" subtitle="AwardToast, StatBar" -->
-<html class="p5r-scope">
+<!doctype html>
+<html lang="en" class="p5r-scope">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feedback · Persona 5 Royal design system</title>
 <link rel="stylesheet" href="../../styles.css">
 <link rel="icon" href="../../assets/brand/phantom-thieves-logo.png">
+<style>
+body{margin:0;background:var(--surface-canvas);color:var(--text-on-dark);font-family:var(--font-body)}
+#root{padding:clamp(var(--space-4), 6vw, var(--space-6))}
+.feedback-demo .p5r-toast__shape::before{
+  content:'';flex:none;inline-size:var(--space-5);block-size:var(--space-5);background:var(--accent-highlight);
+  clip-path:polygon(0 51%, 18% 33%, 40% 55%, 81% 10%, 100% 27%, 40% 88%)
+}
+@media (forced-colors: active){
+  .feedback-demo .p5r-toast__shape::before{background:CanvasText;forced-color-adjust:none}
+}
+</style>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script type="text/babel" src="../../_ds_bundle.jsx"></script>
-<div id="root" style="background:var(--surface-canvas);color:var(--text-on-dark);font-family:var(--font-body);padding:32px;box-sizing:border-box"></div>
+<div id="root"></div>
 <script type="text/babel">
 const { AwardToast, StatBar } = window.PersonaFiveRoyalDS;
 function Demo(){
   return (
-    <div style={{display:'grid',gap:28,maxWidth:460}}>
-      <AwardToast title="Target stolen" icon="../../assets/glyphs/btn-08.png">Procrastination was cleared.</AwardToast>
+    <div className="feedback-demo" style={{display:'grid',gap:28,maxWidth:460}}>
+      <AwardToast title="Target stolen">Procrastination was cleared.</AwardToast>
       <div style={{display:'grid',gap:16}}>
         <StatBar label="HP" value={120} max={200} />
         <StatBar label="SP" value={48} max={90} kind="sp" />

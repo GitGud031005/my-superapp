@@ -175,7 +175,7 @@ function Button({ variant = 'light', size = 'md', type = 'button', className, ch
 function Tabs({ items, value, onChange, label = 'Sections' }) {
   const uid = useId();
   const refs = useRef({});
-  // If value matches no tab, the first tab keeps the tab stop so the list stays keyboard-reachable
+  // Keep the selected tab and keyboard tab stop in sync when the old tab disappears.
   const current = items.some((i) => i.id === value) ? value : items[0]?.id;
   const select = (target) => {
     onChange(target.id);
@@ -200,7 +200,7 @@ function Tabs({ items, value, onChange, label = 'Sections' }) {
           role="tab"
           type="button"
           id={item.panelId ? `${item.panelId}-tab` : `${uid}-tab-${i}`}
-          aria-selected={item.id === value}
+          aria-selected={item.id === current}
           aria-controls={item.panelId}
           tabIndex={item.id === current ? 0 : -1}
           className="p5r-tab"
@@ -222,27 +222,46 @@ function Tag({ tone = 'red', children }) {
 
 /* components/controls/TextField.jsx */
 
-function TextField({ label, value, onChange, multiline = false, hint, error, id, ...rest }) {
+function TextField({
+  label, value, onChange, multiline = false, hint, error, errorPrefix = 'Error:', id, className,
+  'aria-describedby': description, 'aria-invalid': invalid, ...rest
+}) {
   const auto = useId();
   const fieldId = id || auto;
-  const describedBy = [hint && `${fieldId}-hint`, error && `${fieldId}-err`].filter(Boolean).join(' ') || undefined;
+  const describedBy = [...new Set([
+    hint && `${fieldId}-hint`,
+    error && `${fieldId}-err`,
+    ...(description?.trim().split(/\s+/) ?? []),
+  ].filter(Boolean))].join(' ') || undefined;
   const Control = multiline ? 'textarea' : 'input';
   return (
     <div className={`p5r-field${error ? ' p5r-field--error' : ''}`}>
       <label className="p5r-field__label" htmlFor={fieldId}>{label}</label>
       <Control
         id={fieldId}
-        className="p5r-field__control"
+        className={['p5r-field__control', className].filter(Boolean).join(' ')}
         value={value}
         onChange={onChange}
-        aria-invalid={error ? true : undefined}
+        aria-invalid={error ? true : invalid}
         aria-describedby={describedBy}
         {...(multiline ? { rows: 3 } : { type: 'text' })}
         {...rest}
       />
       {hint && <div id={`${fieldId}-hint`} className="p5r-field__hint">{hint}</div>}
-      {error && <div id={`${fieldId}-err`} className="p5r-field__error">Error: {error}</div>}
+      {error && <div id={`${fieldId}-err`} className="p5r-field__error">{errorPrefix && `${errorPrefix} `}{error}</div>}
     </div>
+  );
+}
+
+/* components/navigation/KeyHints.jsx */
+
+function KeyHints({ items, label = 'Keyboard shortcuts' }) {
+  return (
+    <ul className="p5r-key-hints" role="list" aria-label={label}>
+      {items.map(({ keys, action }) => (
+        <li key={action}><kbd>{keys}</kbd><span>{action}</span></li>
+      ))}
+    </ul>
   );
 }
 
@@ -252,12 +271,13 @@ function MenuList({ items, value, onChange, onActivate, label = 'Menu' }) {
   const uid = useId();
   const enabled = items.filter((i) => !i.disabled);
   const optionId = (id) => `${uid}-${id}`;
-  const isEnabled = (id) => enabled.some((i) => i.id === id);
+  const selected = enabled.find((item) => item.id === value)?.id;
+  const active = selected ?? enabled[0]?.id;
 
   // Walks the full list from the current position, so a disabled or missing value still moves sensibly
   const step = (dir) => {
     const n = items.length;
-    let i = items.findIndex((x) => x.id === value);
+    let i = items.findIndex((x) => x.id === active);
     if (i === -1) i = dir > 0 ? -1 : n;
     for (let k = 0; k < n; k++) {
       i = (i + dir + n) % n;
@@ -270,7 +290,11 @@ function MenuList({ items, value, onChange, onActivate, label = 'Menu' }) {
     else if (e.key === 'ArrowUp') { e.preventDefault(); step(-1); }
     else if (e.key === 'Home') { e.preventDefault(); enabled[0] && onChange(enabled[0].id); }
     else if (e.key === 'End') { e.preventDefault(); enabled.length && onChange(enabled[enabled.length - 1].id); }
-    else if ((e.key === 'Enter' || e.key === ' ') && isEnabled(value)) { e.preventDefault(); onActivate?.(value); }
+    else if ((e.key === 'Enter' || e.key === ' ') && active != null) {
+      e.preventDefault();
+      if (selected == null) onChange(active);
+      onActivate?.(active);
+    }
   };
 
   return (
@@ -279,7 +303,7 @@ function MenuList({ items, value, onChange, onActivate, label = 'Menu' }) {
       role="listbox"
       tabIndex={0}
       aria-label={label}
-      aria-activedescendant={value != null ? optionId(value) : undefined}
+      aria-activedescendant={active != null ? optionId(active) : undefined}
       onKeyDown={onKeyDown}
     >
       {items.map((item, i) => (
@@ -287,7 +311,8 @@ function MenuList({ items, value, onChange, onActivate, label = 'Menu' }) {
           key={item.id}
           id={optionId(item.id)}
           role="option"
-          aria-selected={item.id === value}
+          aria-selected={item.id === selected}
+          data-active={item.id === active || undefined}
           aria-disabled={item.disabled || undefined}
           className="p5r-menu__item"
           style={{ '--i': i }}
@@ -429,21 +454,21 @@ function AwardToast({ title, children, icon }) {
 /* components/feedback/StatBar.jsx */
 
 function StatBar({ label, value, max, kind = 'hp' }) {
-  const top = max > 0 ? max : 1;
-  const now = Math.max(0, Math.min(top, value));
+  const top = Number.isFinite(max) && max > 0 ? max : 1;
+  const now = Number.isFinite(value) ? Math.max(0, Math.min(top, value)) : 0;
   return (
     <div
       className={`p5r-stat p5r-stat--${kind}`}
-      role="meter"
+      role={kind === 'progress' ? 'progressbar' : 'meter'}
       aria-label={label}
       aria-valuenow={now}
       aria-valuemin={0}
       aria-valuemax={top}
-      aria-valuetext={`${value} of ${max}`}
+      aria-valuetext={`${now} of ${top}`}
     >
       <span className="p5r-stat__label" aria-hidden="true">{label}</span>
       <div className="p5r-stat__track" aria-hidden="true"><div className="p5r-stat__fill" style={{ '--pct': `${(now / top) * 100}%` }} /></div>
-      <span className="p5r-stat__num" aria-hidden="true">{value}/{max}</span>
+      <span className="p5r-stat__num" aria-hidden="true">{now}/{top}</span>
     </div>
   );
 }
@@ -455,7 +480,11 @@ function CallingCard({
   to, body, signature = 'The Phantom Thieves of Hearts', flipped = false, onFlip, seed = 0, tilted = true,
   assetBase = '../../assets',
 }) {
-  const logo = `${assetBase}/brand/phantom-thieves-logo.png`;
+  const logo = assetBase == null ? null : `${assetBase}/brand/phantom-thieves-logo.png`;
+  const [failedLogo, setFailedLogo] = useState(null);
+  const mark = logo && logo !== failedLogo
+    ? <img className="p5r-card__logo" src={logo} alt="" onError={() => setFailedLogo(logo)} />
+    : <span className="p5r-card__logo p5r-card__logo--fallback" aria-hidden="true" />;
   const Root = onFlip ? 'button' : 'div';
   const rootProps = onFlip ? { type: 'button', onClick: onFlip, 'aria-pressed': flipped, 'aria-label': 'Show the logo side' } : { 'aria-hidden': true };
   return (
@@ -465,13 +494,11 @@ function CallingCard({
         <span className="p5r-card__face p5r-card__front">
           <span className="p5r-card__front-inner">
             <span className="p5r-card__corner">
-              <img className="p5r-card__logo" src={logo} alt="" />
+              {mark}
               <RansomTitle text="Take your heart" skin="logo" fit maxSize={30} singleLine flipCase={false} jitter={.15} tilt={3} seed={seed + 1} delay={150} duration={250} />
             </span>
             <RansomTitle text={to} fit maxSize={90} jitter={.45} tilt={6} seed={seed + 2} delay={300} duration={450} />
-            <span className="p5r-card__body">
-              <RansomTitle text={body} fit maxSize={64} jitter={.22} tilt={4} seed={seed + 3} delay={650} duration={900} />
-            </span>
+            <span className="p5r-card__body">{body}</span>
             <span className="p5r-card__sig">
               <RansomTitle text={signature} fit maxSize={34} singleLine align="end" jitter={.2} tilt={4} seed={seed + 4} delay={1500} duration={350} />
             </span>
@@ -479,7 +506,7 @@ function CallingCard({
         </span>
         <span className="p5r-card__face p5r-card__back">
           <span className="p5r-card__back-inner">
-            <img className="p5r-card__logo" src={logo} alt="" />
+            {mark}
             <RansomTitle text="Take your heart" skin="logo" fit maxSize={120} singleLine flipCase={false} jitter={.2} tilt={3} seed={seed + 5} duration={400} />
           </span>
         </span>
@@ -493,16 +520,32 @@ function CallingCard({
 function TarotCard({ index, back = false, name, height = 320, tilt, onFlip, assetBase = '../../assets' }) {
   const pad = String(index).padStart(2, '0');
   const label = name || `Tarot card ${index}`;
+  const [failedFaces, setFailedFaces] = useState({});
   const Root = onFlip ? 'button' : 'div';
   const rootProps = onFlip ? { type: 'button', onClick: onFlip, 'aria-pressed': back, 'aria-label': `Show the back of ${label}` } : {};
   return (
     <Root className={`p5r-tarot${back ? ' is-back' : ''}`} style={tilt != null ? { '--tilt': tilt } : undefined} {...rootProps}>
       <span className="p5r-tarot__inner" style={{ '--h': `${height}px`, '--ratio': .48 }}>
-        <img className="p5r-tarot__face" src={`${assetBase}/tarot/tarot-${pad}.png`} alt={onFlip ? '' : label} aria-hidden={back || undefined} />
-        <img className="p5r-tarot__face p5r-tarot__face--back" src={`${assetBase}/tarot/tarot-00.png`} alt="" />
+        {['front', 'back'].map((side) => {
+          const isBack = side === 'back';
+          const src = assetBase == null ? null : `${assetBase}/tarot/tarot-${isBack ? '00' : pad}.png`;
+          const className = `p5r-tarot__face${isBack ? ' p5r-tarot__face--back' : ''}`;
+          const alt = onFlip || isBack ? '' : label;
+          if (src && failedFaces[side] !== src) {
+            return <img key={side} className={className} src={src} alt={alt} aria-hidden={isBack || back || undefined}
+              onError={() => setFailedFaces((previous) => ({ ...previous, [side]: src }))} />;
+          }
+          return (
+            <span key={side} className={`${className} p5r-tarot__fallback`} role={alt ? 'img' : undefined}
+              aria-label={alt || undefined} aria-hidden={!alt || back || undefined}>
+              <span className="p5r-tarot__number">{isBack ? '◆' : pad}</span>
+              {!isBack && <span>{label}</span>}
+            </span>
+          );
+        })}
       </span>
     </Root>
   );
 }
 
-window.PersonaFiveRoyalDS = { RansomTitle, Button, Tabs, Tag, TextField, MenuList, Banner, DateSticker, Dialog, Panel, SpeechBubble, AwardToast, StatBar, CallingCard, TarotCard };
+window.PersonaFiveRoyalDS = { RansomTitle, Button, Tabs, Tag, TextField, KeyHints, MenuList, Banner, DateSticker, Dialog, Panel, SpeechBubble, AwardToast, StatBar, CallingCard, TarotCard };

@@ -1,4 +1,6 @@
-White field with a thick black border and a hard red shadow, label in red display caps. Errors turn the shadow yellow and add a text message, so color is never the only signal. Write the error as the fix ("Write a message for the card"), not the problem. The error is linked through `aria-describedby`; on submit, move focus to the first invalid field.
+White field with a thick black border and a hard offset shadow. A black inset underline marks focus on every surface. Errors keep their yellow shadow and explanatory message while the field has focus. Describe what the user can do next, for example “Write a message for the card.” The error is linked through `aria-describedby`. On submit, move focus to the first invalid field.
+
+Extra `aria-describedby` IDs and classes are added to the component defaults. Use `errorPrefix` to translate the error prefix.
 
 ```jsx
 <TextField label="To" value={to} onChange={(e) => setTo(e.target.value)} maxLength={80} />
