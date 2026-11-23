@@ -1,4 +1,4 @@
-<!-- @dsCard group="Components" viewport="700x520" name="Surfaces" subtitle="Panel, Banner, SpeechBubble, DateSticker, Dialog" -->
+<!-- @dsCard group="Components" viewport="700x860" name="Surfaces" subtitle="Panel, Banner, SpeechBubble, DateSticker, Dialog" -->
 <html class="p5r-scope">
 <link rel="stylesheet" href="../../styles.css">
 <link rel="icon" href="../../assets/brand/phantom-thieves-logo.png">
@@ -22,6 +22,21 @@ function Demo(){
         <SpeechBubble speaker="Morgana" tailX={30}>We should steal that heart before Friday.</SpeechBubble>
         <Panel title="Mission" tilt="-1.5deg" style={{width:240}}>Steal the heart before the deadline.</Panel>
         <Panel tone="light" style={{width:200}}>Readable body copy sits on a light panel.</Panel>
+      </div>
+      <div style={{display:'flex',gap:40,flexWrap:'wrap',alignItems:'flex-start'}}>
+        <span className="p5r-echo" style={{display:'inline-block'}}><Banner tone="black" tilt="-2deg">Echo plate</Banner></span>
+        <div className="p5r-echo" style={{width:220,'--echo-x':'10px','--echo-y':'9px'}}><Panel tone="light" style={{width:'auto'}}>A plate behind a panel.</Panel></div>
+      </div>
+      <div style={{display:'flex',gap:28,flexWrap:'wrap',alignItems:'flex-start'}}>
+        {['a','b','c'].map((v) => (
+          <div key={v} className={`p5r-quad p5r-quad--${v}`} style={{width:200}}>
+            <div className="p5r-quad__edge"><div className="p5r-quad__body">Quad {v}: four sides, none parallel.</div></div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
+        <div style={{width:300,height:140,background:'var(--starfield)'}} role="img" aria-label="Red and black star field sample" />
+        <div style={{width:300,height:140,background:'var(--starfield-mono)'}} role="img" aria-label="Black and white star field sample" />
       </div>
       <div><Button variant="primary" onClick={()=>setOpen(true)}>Open dialog</Button></div>
       <Dialog open={open} title="Send the card?" onClose={()=>setOpen(false)} closeLabel="Close"

@@ -39,7 +39,7 @@ This folder is a self-contained design system: CSS tokens, 15 React components a
 4. **Shadow.** Hard offset only, never blurred. Use `filter: drop-shadow` so the shadow follows a clip-path.
 5. **Type.** Display face (Anton) for short labels, titles and numerals. Everything longer than a line uses the body face (Archivo) with normal tracking and `--leading-normal`. Use `RansomTitle` for hero titles and short signatures, never for text people must read.
 6. **Selection.** The selected item scales up (`--menu-select-scale`) and carries a cyan strip; the current nav link is cyan. Never use color alone for state.
-7. **Motion.** Fast and snappy (`--ease-snap`; `--ease-slam` for things that land, like a dialog). Hover, press and selection use `--duration-fast` (90ms); entrances up to 320ms; only showpieces run longer (`--duration-pop` 450ms, `--duration-flip` 700ms). Use the `--duration-*` tokens; never invent durations. Gate hover styles with `@media (hover: hover)`. Everything stops under `prefers-reduced-motion` (handled in `components.css`; page CSS must do the same for its own motion).
+7. **Motion.** Fast and snappy (`--ease-snap`; `--ease-slam` for things that land, like a dialog). One vocabulary for interactive parts: hover in `--duration-hover` (140ms, `--ease-snap`), press in `--duration-press` (60ms), release and settle in `--duration-release` (240ms, `--ease-spring`, slight overshoot), leaving in `--duration-exit` (160ms, `--ease-exit`). A press keeps the hover pose and only adds scale; never let it jump. Animate `transform`, `clip-path` or `background-position`, never `box-shadow`. `--duration-fast` (90ms) is for small swaps with no travel; entrances up to 320ms; only showpieces run longer (`--duration-pop` 450ms, `--duration-flip` 700ms). Use the `--duration-*` tokens; never invent durations. Gate hover styles with `@media (hover: hover)`. Everything stops under `prefers-reduced-motion` (handled in `components.css`; page CSS must do the same for its own motion).
 8. **Accessibility.** Keep the focus ring (`--focus-ring`: cyan on dark; class `p5r-light` turns it black on light surfaces; red panels turn it white). Keyboard behavior is built into `MenuList`, `Tabs` and `Dialog`; never replace it with click-only handlers. Every page has `lang`, one `h1`, a skip link and a `<main id="main">`.
 9. **Buttons by surface.** On dark surfaces: `primary` for the one main action, `light` for the rest. On light panels: `primary` and `dark`. A `light` button on a light panel disappears. One `primary` per view.
 10. **Layout.** Page layout uses the spacing tokens (`--space-*`) and logical properties (`inset-inline-start`, `padding-inline`), wraps rows with `flex-wrap`, and never scrolls sideways at 320px.
@@ -56,7 +56,7 @@ This folder is a self-contained design system: CSS tokens, 15 React components a
 | Switch view in place | `Tabs` | pair each tab with a `role="tabpanel"` element via `panelId` |
 | Pick from a list (game-menu style) | `MenuList` | a listbox, not site navigation; use links for navigation |
 | Text input | `TextField` | always a `label`; `multiline` for long text; `error` shows next to the field |
-| Small label | `Tag` | tones red, white, black, yellow, cyan |
+| Small label | `Tag` | tones red, white, black, yellow, cyan; `sticker` for one emphasis per view |
 | Bar value | `StatBar` | `kind` hp, sp or progress |
 | Confirmation | `Dialog` | native `<dialog>`, focus and Escape handled |
 | Short notice | `AwardToast` | yellow title, one line of detail |
@@ -72,6 +72,12 @@ Site navigation is not a component: use the `.site-nav` links in `starter.html` 
 - **Board / list page:** `Banner` h2, `Tabs` for filters, a list of dark `Panel`s each with `Tag`s and one `Button`. Empty state: a light `Panel` saying what goes here and one action.
 - **Form page:** one light `Panel` with `TextField`s stacked in a `.stack`, `primary` submit plus `dark` secondary, a `Dialog` to confirm anything that sends or deletes, an `AwardToast` after success.
 - **Detail page:** `Banner` h2, `TarotCard` or image beside a light `Panel` of text; the `.grid` pattern stacks them on narrow screens.
+
+## Shapes beyond the clips
+
+- `--clip-quad-a|b|c`: irregular four-sided text boxes. Use the `.p5r-quad` markup (`__edge` > `__body`, modifier `--b` or `--c`) so the white edge and the hard shadow follow the shape.
+- `.p5r-echo` on a wrapper: a red plate behind a Banner or Panel, offset and rotated, with one shard tail. `--echo`, `--echo-x`, `--echo-y`, `--echo-rot` adjust it.
+- `--starfield` (red and black) and `--starfield-mono` (black, white, grey): nested star outlines as a repeating background. Generated geometry, no images. Like the bullseye, they are backdrops: text sits on an opaque slab, never straight on them.
 
 ## When no component fits
 

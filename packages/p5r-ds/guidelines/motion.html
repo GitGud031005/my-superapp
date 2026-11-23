@@ -11,14 +11,21 @@ code{color:var(--yellow-400)}
 </style>
 <table>
   <tr><th>Token</th><th>Value</th><th>Source</th></tr>
-  <tr><td>--duration-fast</td><td><code>90ms</code></td><td>chosen. Hover lift, press, tab and menu selection</td></tr>
+  <tr><td>--duration-press</td><td><code>60ms</code></td><td>chosen. Finger down: button sinks, close button shrinks</td></tr>
+  <tr><td>--duration-hover</td><td><code>140ms</code></td><td>chosen. Pointer in: lift, colour wipe, tab fill, menu selection</td></tr>
+  <tr><td>--duration-release</td><td><code>240ms</code></td><td>chosen. Pointer out or finger up: settles with --ease-spring</td></tr>
+  <tr><td>--duration-exit</td><td><code>160ms</code></td><td>chosen. Dialog leaves with --ease-exit</td></tr>
+  <tr><td>--duration-fast</td><td><code>90ms</code></td><td>chosen. Small swaps with no travel</td></tr>
   <tr><td>--duration-slow</td><td><code>320ms</code></td><td>chosen. Menu enter, dialog, toast</td></tr>
   <tr><td>--duration-wipe</td><td><code>520ms</code></td><td>chosen. Screen wipes</td></tr>
   <tr><td>--duration-pop</td><td><code>450ms</code></td><td>chosen. Ransom tile entry only (showpiece, not interface feedback)</td></tr>
   <tr><td>--duration-flip</td><td><code>700ms</code></td><td>chosen. Calling card and tarot flips only (showpiece)</td></tr>
   <tr><td>--stagger</td><td><code>40ms</code></td><td>chosen. Between menu items</td></tr>
   <tr><td>--ease-snap</td><td><code>cubic-bezier(.2,.9,.1,1)</code></td><td>chosen. Fast start, soft landing</td></tr>
+  <tr><td>--ease-spring</td><td><code>cubic-bezier(.3,1.5,.5,1)</code></td><td>chosen. Slight overshoot. Release and settle, never entrances</td></tr>
+  <tr><td>--ease-exit</td><td><code>cubic-bezier(.4,0,1,1)</code></td><td>chosen. Accelerates away. Dialog exit</td></tr>
   <tr><td>--ease-slam</td><td><code>cubic-bezier(.5,0,.1,1)</code></td><td>chosen. Slow wind-up, hard landing. Dialog entrance</td></tr>
   <tr><td>day-change</td><td><code>6s + 2s + 4s</code></td><td>fan study, not from Atlus</td></tr>
 </table>
+<p style="color:var(--text-muted-on-dark);margin-top:14px">One vocabulary for every control: hover is a fast lift and a hard-stop colour wipe along the slant, press sinks without leaving the hover pose, release springs back slower than it went in. Only transform and background-position move; no shadow is animated.</p>
 <p style="color:var(--text-muted-on-dark);margin-top:14px">All animation is switched off under prefers-reduced-motion.</p>

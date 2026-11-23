@@ -330,8 +330,13 @@
 }
 
 .p5r-btn.phantom-ledger__lang[aria-pressed='true'] {
+  --btn-ink: var(--text-on-light);
+  --btn-wipe-ink: var(--text-on-light);
+}
+
+.p5r-btn.phantom-ledger__lang[aria-pressed='true']::after,
+.p5r-btn.phantom-ledger__lang[aria-pressed='true']:hover::after {
   background: var(--select-strip);
-  color: var(--text-on-light);
 }
 
 /* The design system's dark panel and dialog carry a white outline; this module keeps shadows and slabs instead. */
@@ -630,13 +635,13 @@
   font-weight: var(--weight-body-heavy);
   overflow-wrap: anywhere;
   transform-origin: left center;
-  transition: transform var(--duration-fast) var(--ease-snap);
+  transition: transform var(--duration-release) var(--ease-spring);
 }
 
 .phantom-ledger__rank > span:not(.p5r-sr-only) {
   display: inline-block;
   transform-origin: left center;
-  transition: transform var(--duration-fast) var(--ease-snap);
+  transition: transform var(--duration-release) var(--ease-spring);
 }
 
 .phantom-ledger__col-bar {
@@ -680,8 +685,10 @@
 }
 
 .phantom-ledger__debt:focus-within .p5r-btn {
-  background: var(--surface-panel-dark);
-  color: var(--text-on-dark);
+  --btn-face: var(--surface-panel-dark);
+  --btn-ink: var(--text-on-dark);
+  --btn-wipe: var(--surface-panel-light);
+  --btn-wipe-ink: var(--text-on-light);
 }
 
 @media (min-width: 901px) {
@@ -727,8 +734,10 @@
   }
 
   .phantom-ledger__debt:hover .p5r-btn {
-    background: var(--surface-panel-dark);
-    color: var(--text-on-dark);
+    --btn-face: var(--surface-panel-dark);
+    --btn-ink: var(--text-on-dark);
+    --btn-wipe: var(--surface-panel-light);
+    --btn-wipe-ink: var(--text-on-light);
   }
 }
 
@@ -943,7 +952,7 @@
   color: inherit;
   font: inherit;
   cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-snap);
+  transition: transform var(--duration-release) var(--ease-spring);
 }
 
 .phantom-ledger__toggle[aria-pressed='true'] {

@@ -87,5 +87,5 @@ Backend module `com.superapp.ledger` (Flyway `V3__create_ledger.sql`, schema `le
 
 Run from `packages/p5r-ds/`:
 
-- `node build.mjs` regenerates `_ds_bundle.jsx` and `_ds_manifest.json` (never hand-edit them). Last known output: `bundle: 15 components; manifest: 9 cards, 124 tokens`.
+- `node build.mjs` regenerates `_ds_bundle.jsx` and `_ds_manifest.json` (never hand-edit them). Last known output: `bundle: 15 components; manifest: 9 cards, 136 tokens`.
 - `python -m http.server 8000`, then `node scripts/check-page.mjs http://localhost:8000/<page>` checks a page at 1280, 375 and 320px. Needs Node 22+ and Chrome or Edge. Three errors and two warnings already exist in the demo pages (320px sideways scroll on `guidelines/colors-roles.html`, `guidelines/motion.html`, the surfaces card; raw `#000` on `tokens-preview.html` and `colors-roles.html`).
